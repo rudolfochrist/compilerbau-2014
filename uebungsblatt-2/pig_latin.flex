@@ -1,6 +1,6 @@
 
 %option noyywrap
-
+%option debug
 %{
 char character = 0;
 char vowel = 0;

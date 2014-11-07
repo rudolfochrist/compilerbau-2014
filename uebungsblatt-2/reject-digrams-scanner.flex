@@ -1,5 +1,6 @@
 
 %option noyywrap
+%option debug
 %{
   int number_of_digrams = 0;
 %}
