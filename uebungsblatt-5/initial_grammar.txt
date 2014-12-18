@@ -1,0 +1,32 @@
+1. program -> decl_part.
+2. decl_part -> { var_decl } { func_decl }+.
+3. var_decl -> type id_list ";".
+4. type -> "int" | "bool".
+5. id_list -> id "," id_list | id.
+6. func_decl -> type id "(" params ")" body.
+7. params -> param_list |ε.
+8. param_list -> type id "," param_list | type id.
+9. body -> "{"{ var_decl } stmt_sequ "}".
+10. stmt_seq -> { stmt }.
+11. stmt -> simple_stmt ";" | struct_stmt.
+12. simple_stmt -> assignment | func_call | return_stmt.
+13. struct_stmt -> comp_stmt | cond | loop.
+14. assignment -> id ":=" expr .
+15. cond -> "if" "(" expr ")" "then" stmt "fi" |"if" "(" expr ")" "then" stmt "else" stmt "fi".
+16. loop -> "while" "(" expr ")" stmt .
+17. func_call -> id "(" args ")" . 
+18. args -> arg_list |ε.
+19. arg_list -> expr "," arg_list | expr.
+20. return_stmt -> "return" expr .
+21. comp_stmt -> "{"stmt_sequ "}".
+22. expr -> simple_expr [rel_op simple_expr].
+23. simple_expr -> term {add_op term}.
+24. term -> factor {mul_op factor}.
+25. factor -> const_val | id | "(" expr ")" | func_call |sign factor | "not" factor.
+26. sign -> "+" | "-".
+27. mul_op -> "*" | "/" | "and".
+28. add_op -> "+" | "-" | "or".
+29. rel_op -> "=" | "!=" | "<"| "<="| ">"| ">=".
+30. const_val -> number | bool_const.
+31. number -> {digit}+.
+32. bool_const -> "true" | "false".
