@@ -2,8 +2,6 @@
 
 * CPL Grammatik
 
-*Legende: NTS : Production Rules {first set}{follow set}*
-
 #+BEGIN_EXAMPLE
 program                 : decl_part
                         ;
@@ -11,7 +9,7 @@ program                 : decl_part
 decl_part               : type id var_or_func_decl
                         ;
 
-var_or-func_decl        : ";" var_decl func_decl
+var_or_func_decl        : ";" var_decl func_decl
                         | "(" params ")" body additional_func_decl
                         ;
 
@@ -59,8 +57,8 @@ stmt_seq                : stmt
                         | /* epsilon */
                         ;
 
-stmt                    : simple_stmt ";" stmt
-                        | struct_stmt stmt
+stmt                    : simple_stmt ";" stmt_seq
+                        | struct_stmt stmt_seq
                         ;
 
 simple_stmt             : id assignment_or_func_call
@@ -76,9 +74,6 @@ struct_stmt             : comp_stmt
                         | loop
                         ;
 
-assignment              : id ":=" expr
-                        ;
-
 cond                    : "if" "(" expr ")" "then" stmt else_stmt "fi"
                         ;
 
@@ -87,9 +82,6 @@ else_stmt               : "else" stmt
                         ;
 
 loop                    : "while" "(" expr ")" stmt
-                        ;
-
-func_call               : id "(" args ")"
                         ;
 
 args                    : arg_list
@@ -196,3 +188,9 @@ bool_const              : "true"
                         | "false"
                         ;
 #+END_EXAMPLE
+
+* FIRST und FOLLOW
+
+| NTS | FIRST | FOLLOW |
+|-----+-------+--------|
+|     |       |        |
