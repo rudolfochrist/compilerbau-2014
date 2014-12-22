@@ -191,6 +191,47 @@ bool_const              : "true"
 
 * FIRST und FOLLOW
 
-| NTS | FIRST | FOLLOW |
-|-----+-------+--------|
-|     |       |        |
+| NTS                     | FIRST                                                | FOLLOW                                                |
+|-------------------------+------------------------------------------------------+-------------------------------------------------------|
+| program                 | {int, bool}                                          | {$}                                                   |
+| decl_part               | {int, bool}                                          | {$}                                                   |
+| var_or_func_decl        | {;, (}                                               | {$}                                                   |
+| var_decl                | {int, bool, e}                                       | {int, bool, id, return "{", if, while, "}"}           |
+| type                    | {int, bool}                                          | {id}                                                  |
+| id_list                 | {id}                                                 | {;}                                                   |
+| id_list_rest            | {",", e}                                             | {;}                                                   |
+| func_decl               | {int, bool}                                          | {$}                                                   |
+| additional_func_decl    | {int, bool, e}                                       | {$}                                                   |
+| params                  | {int, bool, e}                                       | {)}                                                   |
+| param_list              | {int, bool}                                          | {)}                                                   |
+| body                    | {"{"}                                                | {int, bool, $}                                        |
+| var_or_stmt_decl        | {int, bool, id, return, "{", if, while, e}           | {"}"}                                                 |
+| stmt_seq                | {id, return, "{", if, while, e}                      | {"}", else, fi, id, return, "{", if, while}           |
+| stmt                    | {id, return, "{", if, while}                         | {else, fi, id, return, "{", if while, "}"}            |
+| simple_stmt             | {id, return}                                         | {;}                                                   |
+| assignment_or_func_call | {:=, (}                                              | {;}                                                   |
+| struct_stmt             | {"{", if, while}                                     | {id, return, "{", if, while}                          |
+| cond                    | {if}                                                 | {id, return, "{", if, while}                          |
+| else_stmt               | {else, e}                                            | {fi}                                                  |
+| loop                    | {while}                                              | {id, return, "{", if, while}                          |
+| args                    | {0,1,2,3,4,5,6,7,8,9, true, false, +, -, not, e}     | {)}                                                   |
+| arg_list                | {0,1,2,3,4,5,6,7,8,9, true, false, +, -, not}        | {)}                                                   |
+| arg_list_rest           | {",", e}                                             | {)}                                                   |
+| return_stmt             | {return}                                             | {;}                                                   |
+| comp_stmt               | {"{"}                                                | {id, return, "{", if, while}                          |
+| expr                    | {0,1,2,3,4,5,6,7,8,9, true, false, +, -, not}        | {;, ), ","}                                           |
+| expr_rest               | {=, !=, <, <=, >, >=, e}                             | {;, ), ","}                                           |
+| simple_expr             | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not} | {=, !=, <, <=, >, >=, ;, ), ","}                      |
+| add_expr                | {+, -, or, e}                                        | {=, !=, <, <=, >, >=, ;, ), ","}                      |
+| term                    | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not} | {+, -, or, =, !=, <, <=, >, >=, ;, ), ","}            |
+| mul_expr                | {*, /, and, e}                                       | {+, -, or, =, !=, <, <=, >, >=, ;, ), ","}            |
+| factor                  | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not} | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","} |
+| or_func_call            | {(, e}                                               | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","  |
+| sign                    | {+, -}                                               | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not}  |
+| mul_op                  | {*, /, and}                                          | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not}  |
+| add_op                  | {+, -, or}                                           | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not}  |
+| rel_op                  | {=, !=, <, <=, >, >=}                                | {0,1,2,3,4,5,6,7,8,9, true, false, id, (, +, -, not } |
+| const_val               | {0,1,2,3,4,5,6,7,8,9, true, false}                   | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","} |
+| number                  | {0,1,2,3,4,5,6,7,8,9}                                | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","} |
+| digit                   | {0,1,2,3,4,5,6,7,8,9,e}                              | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","} |
+| bool_const              | {true, false}                                        | {*, /, and, +, -, or, =, !=, <, <=, >, >=, ;, ), ","} |
