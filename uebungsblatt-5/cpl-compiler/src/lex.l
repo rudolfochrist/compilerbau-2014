@@ -13,36 +13,36 @@
 
 %%
 
-"true"            { print("true_keyword"); }
-"false"           { print("false_keyword"); }
-[0-9]+            { print("number " + yytext()); }
-"="               { print("eq_op"); }
-"!="              { print("neq_op"); }
-"<"               { print("lt_op"); }
-"<="              { print("lte_op"); }
-">"               { print("gt_op"); }
-">="              { print("gte_op"); }
-"+"               { print("plus_op"); }
-"-"               { print("minus_op"); }
-"or"              { print("or_op"); }
-"*"               { print("mul_op"); }
-"/"               { print("div_op"); }
-"and"             { print("and_op"); }
-"("               { print("open_round"); }
-")"               { print("close_round"); }
-"not"             { print("not_op"); }
-"{"               { print("open_brace"); }
-"}"               { print("close_brace"); }
-"return"          { print("retrun_op"); }
-","               { print("comma"); }
-"while"           { print("while_keyword"); }
-"else"            { print("else_keyword"); }
-"if"              { print("if_keyword"); }
-":="              { print("assignment"); }
-"int"             { print("int_type"); }
-"bool"            { print("bool_type"); }
-";"               { print("semicolon"); }
-"\n"              { print("newline"); }
+"true"            { return Parser.CONST_TRUE; }
+"false"           { return Parser.CONST_FALSE; }
+[0-9]+            { return yytext(); }
+"="               { return Parser.OP_EQ; }
+"!="              { retrun Parser.OP_NEQ; }
+"<"               { return Parser.OP_LT; }
+"<="              { return Parser.OP_LE; }
+">"               { return Parser.OP_GT; }
+">="              { return Parser.OP_GE; }
+"+"               { return Parser.OP_PLUS; }
+"-"               { return Parser.OP_MINUS; }
+"or"              { return Parser.OP_OR; }
+"*"               { return Parser.OP_MUL; }
+"/"               { return Parser.OP_DIV; }
+"and"             { return Parser.OP_AND; }
+"("               { return Parser.OPEN_ROUND; }
+")"               { return Parser.CLOSE_ROUND; }
+"not"             { return Parser.OP_NOT; }
+"{"               { return Parser.OPEN_BRACE; }
+"}"               { return Parser.CLOSE_BRACE; }
+"return"          { return Parser.KEYWORD_RETURN; }
+","               { return Parser.COMMA; }
+"while"           { return Parser.KEYWORD_WHILE; }
+"else"            { return Parser.KEYWORD_ELSE; }
+"if"              { return Parser.KEYWORD_IF; }
+":="              { return Parser.OP_ASSIGNMENT; }
+"int"             { return Parser.TYPE_INT; }
+"bool"            { return Parser.TYPE_BOOL; }
+";"               { return Parser.SEMICOLON; }
+"\n"              { /* ignore it for now */ }
 
 [a-z][a-zA-Z0-9_]* {
   if (yytext().length() < 8) {
