@@ -43,5 +43,5 @@
 "int"             { print("int_type"); }
 "bool"            { print("bool_type"); }
 
-[a-z][a-zA-Z0-9_] { print("identifier " + yytext()); }
+[a-z][a-zA-Z0-9_] { print("identifier " + yytext().substring(0, 8)); }
 "/\*.*\*/"        { print(yytext()); }
