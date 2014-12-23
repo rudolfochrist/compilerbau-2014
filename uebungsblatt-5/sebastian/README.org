@@ -6,7 +6,7 @@
 program                 : decl_part
                         ;
 
-decl_part               : type id var_or_func_decl
+decl_part               : type id_list var_or_func_decl
                         ;
 
 var_or_func_decl        : ";" var_decl func_decl
