@@ -43,5 +43,11 @@
 "int"             { print("int_type"); }
 "bool"            { print("bool_type"); }
 
-[a-z][a-zA-Z0-9_] { print("identifier " + yytext().substring(0, 8)); }
+[a-z][a-zA-Z0-9_] {
+  if (yytext().length() < 8) {
+    print("identifier " + yytext());
+  } else {
+    print("indentifier " + yytext().substring(0, 8));
+  }
+}
 "/\*.*\*/"        { print(yytext()); }
