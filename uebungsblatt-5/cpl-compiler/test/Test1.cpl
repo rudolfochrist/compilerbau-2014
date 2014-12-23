@@ -1,0 +1,12 @@
+true false = != < <= > >= + - or * / and ( ) not { } return , while else if := int bool ; then fi
+12345 
+i id id3 id44 id555 id6666 if77777 id888888 id9999999 id0000000000 
+I ID ID3 ID44 ID555 ID6666 IF77777 ID888888 ID9999999 ID0000000000 
+/* simple comment */
+/* simple
+comment2 */
+/* /*nested comment */ */
+/* /*nested comment2 */
+/* nested comment3 */ */
+/* /* nested 
+comment4 */ */
