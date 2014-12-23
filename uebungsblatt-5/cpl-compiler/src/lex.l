@@ -9,6 +9,7 @@
 
 %class Lexer
 %line
+%debug
 
 %%
 
@@ -21,7 +22,7 @@
 "<="              { print("lte_op"); }
 ">"               { print("gt_op"); }
 ">="              { print("gte_op"); }
-"+"               { print("plus_op") }
+"+"               { print("plus_op"); }
 "-"               { print("minus_op"); }
 "or"              { print("or_op"); }
 "*"               { print("mul_op"); }
@@ -42,3 +43,4 @@
 "bool"            { print("bool_type"); }
 
 [a-z][a-zA-Z0-9_] { print("identifier " + yytext); }
+"/\*.*\*/"        { print(yytext); }
