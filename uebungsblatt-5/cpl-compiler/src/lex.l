@@ -41,6 +41,8 @@
 ":="              { print("assignment"); }
 "int"             { print("int_type"); }
 "bool"            { print("bool_type"); }
+";"               { print("semicolon"); }
+"\n"              { print("newline"); }
 
 [a-z][a-zA-Z0-9_] {
   if (yytext().length() < 8) {
