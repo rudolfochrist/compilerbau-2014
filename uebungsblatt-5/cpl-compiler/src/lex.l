@@ -9,7 +9,6 @@
 
 %class Lexer
 %line
-%debug
 %standalone
 
 %%
