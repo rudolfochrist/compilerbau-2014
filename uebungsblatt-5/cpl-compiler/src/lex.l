@@ -16,7 +16,7 @@
 
 "true"            { print("true_keyword"); }
 "false"           { print("false_keyword"); }
-[0-9]+            { print("number " + yytext); }
+[0-9]+            { print("number " + yytext()); }
 "="               { print("eq_op"); }
 "!="              { print("neq_op"); }
 "<"               { print("lt_op"); }
@@ -43,5 +43,5 @@
 "int"             { print("int_type"); }
 "bool"            { print("bool_type"); }
 
-[a-z][a-zA-Z0-9_] { print("identifier " + yytext); }
-"/\*.*\*/"        { print(yytext); }
+[a-z][a-zA-Z0-9_] { print("identifier " + yytext()); }
+"/\*.*\*/"        { print(yytext()); }

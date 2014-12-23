@@ -2,3 +2,5 @@
 .idea
 *.iml
 /uebungsblatt-5/cpl-compiler/src/Lexer.java
+*.class
+/uebungsblatt-5/cpl-compiler/src/Lexer.java~
