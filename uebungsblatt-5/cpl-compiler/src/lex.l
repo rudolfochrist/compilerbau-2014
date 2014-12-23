@@ -44,7 +44,7 @@
 ";"               { print("semicolon"); }
 "\n"              { print("newline"); }
 
-[a-z][a-zA-Z0-9_] {
+[a-z][a-zA-Z0-9_]* {
   if (yytext().length() < 8) {
     print("identifier " + yytext());
   } else {
