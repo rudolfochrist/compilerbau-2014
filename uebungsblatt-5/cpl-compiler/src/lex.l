@@ -52,3 +52,5 @@
   }
 }
 "/\*.*\*/"        { print(yytext()); }
+[\t ]+ { /* ignore whitespace */ }
+. { print("error: unexpected token " + yytext()); }
