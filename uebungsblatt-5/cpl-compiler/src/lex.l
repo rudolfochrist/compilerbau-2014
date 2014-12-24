@@ -17,7 +17,7 @@
 "false"           { return Parser.CONST_FALSE; }
 [0-9]+            { return yytext(); }
 "="               { return Parser.OP_EQ; }
-"!="              { retrun Parser.OP_NEQ; }
+"!="              { return Parser.OP_NEQ; }
 "<"               { return Parser.OP_LT; }
 "<="              { return Parser.OP_LE; }
 ">"               { return Parser.OP_GT; }
