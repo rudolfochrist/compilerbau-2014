@@ -42,6 +42,8 @@
 "int"             { return Parser.TYPE_INT; }
 "bool"            { return Parser.TYPE_BOOL; }
 ";"               { return Parser.SEMICOLON; }
+"then"            { return Parser.KEYWORD_THEN; }
+"fi"              { return Parser.KEYWORD_ENDIF; }
 "\n"              { /* ignore it for now */ }
 
 [a-z][a-zA-Z0-9_]* {
