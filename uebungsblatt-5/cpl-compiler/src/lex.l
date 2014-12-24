@@ -9,13 +9,14 @@
 
 %class Lexer
 %line
-%standalone
+%type String
+
 
 %%
 
 "true"            { return Parser.CONST_TRUE; }
 "false"           { return Parser.CONST_FALSE; }
-[0-9]+            { return yytext(); }
+[0-9]+            { return Parser.LIT_NUMBER; }
 "="               { return Parser.OP_EQ; }
 "!="              { return Parser.OP_NEQ; }
 "<"               { return Parser.OP_LT; }
@@ -44,15 +45,12 @@
 ";"               { return Parser.SEMICOLON; }
 "then"            { return Parser.KEYWORD_THEN; }
 "fi"              { return Parser.KEYWORD_ENDIF; }
-"\n"              { /* ignore it for now */ }
+"\n"              { System.out.println(); }
 
-[a-z][a-zA-Z0-9_]* {
-  if (yytext().length() < 8) {
-    print("identifier " + yytext());
-  } else {
-    print("indentifier " + yytext().substring(0, 8));
-  }
-}
+[a-z][a-zA-Z0-9_]* { return Parser.IDENTIFIER; }
+
 "/\*.*\*/"        { print(yytext()); }
+
 [\t ]+ { /* ignore whitespace */ }
+
 . { print("error: unexpected token " + yytext()); }
