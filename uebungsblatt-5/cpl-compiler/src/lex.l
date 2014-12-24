@@ -33,7 +33,7 @@
 
 "true"            { return t(Parser.Types.CONST_TRUE); }
 "false"           { return t(Parser.Types.CONST_FALSE); }
-[0-9]+            { return t(Parser.Types.LIT_NUMBER); }
+[0-9]+            { return t(Parser.Types.LIT_NUMBER, Integer.parseInt(yytext())); }
 "="               { return t(Parser.Types.OP_EQ); }
 "!="              { return t(Parser.Types.OP_NEQ); }
 "<"               { return t(Parser.Types.OP_LT); }
@@ -64,7 +64,12 @@
 "fi"              { return t(Parser.Types.KEYWORD_ENDIF); }
 "\n"              { System.out.println(); }
 
-[a-z][a-zA-Z0-9_]* { return t(Parser.Types.IDENTIFIER); }
+[a-z][a-zA-Z0-9_]* {
+                   if (yytext().length() > 8) {
+                      print("Identifier too long. Truncate it.");
+                      return t(Parser.Types.IDENTIFIER, yytext().substring(0, 8));
+                   }
+                   return t(Parser.Types.IDENTIFIER); }
 
 "/\*.*\*/"        { print(yytext()); }
 
