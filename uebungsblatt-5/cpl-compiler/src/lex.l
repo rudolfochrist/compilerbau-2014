@@ -4,10 +4,7 @@
 %{
   private Parser parser;
 
-  public Lexer(java.io.Reader r, Parser parser) {
-      this(r);
-      this.parser = parser;
-  }
+  private int lineno = 1;
 
   public Yytoken t(Parser.Types type) {
       return new Yytoken(type);
@@ -22,49 +19,56 @@
   }
 
   public void print(String sym) {
-    System.out.println(sym);
+    System.out.print(sym);
   }
+
 %}
+
+%init{
+    print("" + lineno);
+    print(": ");
+%init}
 
 %class Lexer
 %line
 
 %%
 
-"true"            { return t(Parser.Types.CONST_TRUE); }
-"false"           { return t(Parser.Types.CONST_FALSE); }
-[0-9]+            { return t(Parser.Types.LIT_NUMBER, Integer.parseInt(yytext())); }
-"="               { return t(Parser.Types.OP_EQ); }
-"!="              { return t(Parser.Types.OP_NEQ); }
-"<"               { return t(Parser.Types.OP_LT); }
-"<="              { return t(Parser.Types.OP_LE); }
-">"               { return t(Parser.Types.OP_GT); }
-">="              { return t(Parser.Types.OP_GE); }
-"+"               { return t(Parser.Types.OP_PLUS); }
-"-"               { return t(Parser.Types.OP_MINUS); }
-"or"              { return t(Parser.Types.OP_OR); }
-"*"               { return t(Parser.Types.OP_MUL); }
-"/"               { return t(Parser.Types.OP_DIV); }
-"and"             { return t(Parser.Types.OP_AND); }
-"("               { return t(Parser.Types.OPEN_ROUND); }
-")"               { return t(Parser.Types.CLOSE_ROUND); }
-"not"             { return t(Parser.Types.OP_NOT); }
-"{"               { return t(Parser.Types.OPEN_BRACE); }
-"}"               { return t(Parser.Types.CLOSE_BRACE); }
-"return"          { return t(Parser.Types.KEYWORD_RETURN); }
-","               { return t(Parser.Types.COMMA); }
-"while"           { return t(Parser.Types.KEYWORD_WHILE); }
-"else"            { return t(Parser.Types.KEYWORD_ELSE); }
-"if"              { return t(Parser.Types.KEYWORD_IF); }
-":="              { return t(Parser.Types.OP_ASSIGNMENT); }
-"int"             { return t(Parser.Types.TYPE_INT); }
-"bool"            { return t(Parser.Types.TYPE_BOOL); }
-";"               { return t(Parser.Types.SEMICOLON); }
-"then"            { return t(Parser.Types.KEYWORD_THEN); }
-"fi"              { return t(Parser.Types.KEYWORD_ENDIF); }
-"\n"              { System.out.println(); }
+"true"            { print(yytext()); return t(Parser.Types.CONST_TRUE); }
+"false"           { print(yytext()); return t(Parser.Types.CONST_FALSE); }
+[0-9]+            { print(yytext()); return t(Parser.Types.LIT_NUMBER, Integer.parseInt(yytext())); }
+"="               { print(yytext()); return t(Parser.Types.OP_EQ); }
+"!="              { print(yytext()); return t(Parser.Types.OP_NEQ); }
+"<"               { print(yytext()); return t(Parser.Types.OP_LT); }
+"<="              { print(yytext()); return t(Parser.Types.OP_LE); }
+">"               { print(yytext()); return t(Parser.Types.OP_GT); }
+">="              { print(yytext()); return t(Parser.Types.OP_GE); }
+"+"               { print(yytext()); return t(Parser.Types.OP_PLUS); }
+"-"               { print(yytext()); return t(Parser.Types.OP_MINUS); }
+"or"              { print(yytext()); return t(Parser.Types.OP_OR); }
+"*"               { print(yytext()); return t(Parser.Types.OP_MUL); }
+"/"               { print(yytext()); return t(Parser.Types.OP_DIV); }
+"and"             { print(yytext()); return t(Parser.Types.OP_AND); }
+"("               { print(yytext()); return t(Parser.Types.OPEN_ROUND); }
+")"               { print(yytext()); return t(Parser.Types.CLOSE_ROUND); }
+"not"             { print(yytext()); return t(Parser.Types.OP_NOT); }
+"{"               { print(yytext()); return t(Parser.Types.OPEN_BRACE); }
+"}"               { print(yytext()); return t(Parser.Types.CLOSE_BRACE); }
+"return"          { print(yytext()); return t(Parser.Types.KEYWORD_RETURN); }
+","               { print(yytext()); return t(Parser.Types.COMMA); }
+"while"           { print(yytext()); return t(Parser.Types.KEYWORD_WHILE); }
+"else"            { print(yytext()); return t(Parser.Types.KEYWORD_ELSE); }
+"if"              { print(yytext()); return t(Parser.Types.KEYWORD_IF); }
+":="              { print(yytext()); return t(Parser.Types.OP_ASSIGNMENT); }
+"int"             { print(yytext()); return t(Parser.Types.TYPE_INT); }
+"bool"            { print(yytext()); return t(Parser.Types.TYPE_BOOL); }
+";"               { print(yytext()); return t(Parser.Types.SEMICOLON); }
+"then"            { print(yytext()); return t(Parser.Types.KEYWORD_THEN); }
+"fi"              { print(yytext()); return t(Parser.Types.KEYWORD_ENDIF); }
+"\n"              { print(yytext()); print("" + lineno++); print(": "); }
 
 [a-z][a-zA-Z0-9_]* {
+                   print(yytext());
                    if (yytext().length() > 8) {
                       print("Identifier too long. Truncate it.");
                       return t(Parser.Types.IDENTIFIER, yytext().substring(0, 8));
@@ -73,6 +77,6 @@
 
 "/\*.*\*/"        { print(yytext()); }
 
-[\t ]+ { /* ignore whitespace */ }
+[\t ]+ { print(yytext()); }
 
 . { print("error: unexpected token " + yytext()); }
