@@ -1,0 +1,49 @@
+
+public class Yytoken {
+    private Parser.Types type;
+    private int ival;
+    private double dval;
+    private String sval;
+    private Object oval;
+
+    public Yytoken(Parser.Types type) {
+        this.type = type;
+    }
+
+    public Yytoken(Parser.Types type, int ival) {
+        this.type = type;
+        this.ival = ival;
+    }
+
+    public Yytoken(Parser.Types type, double dval) {
+        this.type = type;
+        this.dval = dval;
+    }
+
+    public Yytoken(Parser.Types type, String sval) {
+        this.type = type;
+        this.sval = sval;
+    }
+
+    public Yytoken(Parser.Types type, Object oval) {
+        this.type = type;
+        this.oval = oval;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Yytoken yytoken = (Yytoken) o;
+
+        if (type != yytoken.type) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
+    }
+}
