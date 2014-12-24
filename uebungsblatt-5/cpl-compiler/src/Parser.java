@@ -1,3 +1,5 @@
+import com.sun.javafx.fxml.expression.Expression;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,15 +55,15 @@ public class Parser {
 
     private Lexer scanner;
     private HashMap<String, Object> symbols;
-    private String currentToken;
+    private Yytoken currentToken;
 
     public Parser(Lexer scanner) {
         this.scanner = scanner;
         symbols = new HashMap<String, Object>();
     }
 
-    private boolean match(String token) {
-        if (token.equals(currentToken)) {
+    private boolean match(Types tokenType) {
+        if (new Yytoken(tokenType).equals(currentToken)) {
             try {
                 currentToken = scanner.yylex();
                 return true;
@@ -72,8 +74,8 @@ public class Parser {
         return false;
     }
 
-    private boolean peek(String token) {
-        return token.equals(currentToken);
+    private boolean peek(Types tokenType) {
+        return new Yytoken(tokenType).equals(currentToken);
     }
 
     public void parse() {
@@ -86,269 +88,279 @@ public class Parser {
     }
 
     private void program() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             decl_part();
         }
     }
 
     private void decl_part() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
             decl_part_rest();
         }
     }
 
     private void decl_part_rest() {
-        if (peek(OPEN_ROUND)) {
+        if (peek(Types.OPEN_ROUND)) {
             decl_part_func();
-        } else if (peek(COMMA)) {
+        } else if (peek(Types.COMMA)) {
             var_decl();
             decl_part_func();
         }
     }
 
     private void decl_part_func() {
-        if (peek(OPEN_ROUND)) {
+        if (peek(Types.OPEN_ROUND)) {
             func_decl();
             decl_part_func_rest();
         }
     }
 
     private void decl_part_func_rest() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
             decl_part_func();
         }
     }
 
     private void type_id() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type();
-            match(IDENTIFIER);
+            match(Types.IDENTIFIER);
         }
     }
 
     private void var_decl() {
-        if (peek(COMMA)) {
+        if (peek(Types.COMMA)) {
             id_list();
-            match(SEMICOLON);
+            match(Types.SEMICOLON);
             type_id();
             var_decl_rest();
         }
     }
     private void var_decl_rest() {
-        if (peek(COMMA)) {
+        if (peek(Types.COMMA)) {
             var_decl();
         }
     }
 
     private void type() {
-        if (peek(TYPE_INT)) {
-            match(TYPE_INT);
-        } else if (peek(TYPE_BOOL)) {
-            match(TYPE_BOOL);
+        if (peek(Types.TYPE_INT)) {
+            match(Types.TYPE_INT);
+        } else if (peek(Types.TYPE_BOOL)) {
+            match(Types.TYPE_BOOL);
         }
     }
 
     private void id_list() {
-        if (peek(COMMA)) {
-            match(COMMA);
-            match(IDENTIFIER);
+        if (peek(Types.COMMA)) {
+            match(Types.COMMA);
+            match(Types.IDENTIFIER);
             id_list();
         }
     }
 
     private void func_decl() {
-        if (peek(OPEN_ROUND)) {
-            match(OPEN_ROUND);
+        if (peek(Types.OPEN_ROUND)) {
+            match(Types.OPEN_ROUND);
             params();
-            match(CLOSE_ROUND);
+            match(Types.CLOSE_ROUND);
             body();
         }
     }
 
     private void params() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             param_list();
         }
     }
 
     private void param_list() {
-        if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type();
-            match(IDENTIFIER);
+            match(Types.IDENTIFIER);
             param_list_rest();
         }
     }
 
     private void param_list_rest() {
-        if (peek(COMMA)) {
-            match(COMMA);
+        if (peek(Types.COMMA)) {
+            match(Types.COMMA);
             param_list();
         }
     }
 
     private void body() {
-        if (peek(OPEN_BRACE)) {
-            match(OPEN_BRACE);
+        if (peek(Types.OPEN_BRACE)) {
+            match(Types.OPEN_BRACE);
             var_decl();
             stmt_seq();
-            match(CLOSE_BRACE);
+            match(Types.CLOSE_BRACE);
         }
     }
 
     private void stmt_seq() {
-        if (peek(IDENTIFIER) || peek(KEYWORD_RETURN) || peek(OPEN_BRACE) || peek(KEYWORD_IF) || peek(KEYWORD_WHILE)) {
+        if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) ||
+                peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE)) {
             stmt();
             stmt_seq();
         }
     }
 
     private void stmt() {
-        if (peek(IDENTIFIER) || peek(KEYWORD_RETURN)) {
+        if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN)) {
             simple_stmt();
-            match(SEMICOLON);
-        } else if (peek(OPEN_BRACE) || peek(KEYWORD_IF) || peek(KEYWORD_WHILE)) {
+            match(Types.SEMICOLON);
+        } else if (peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE)) {
             struct_stmt();
         }
     }
 
     private void simple_stmt() {
-        if (peek(IDENTIFIER)) {
+        if (peek(Types.IDENTIFIER)) {
             assignment_or_func_call();
-        } else if (peek(KEYWORD_RETURN)) {
+        } else if (peek(Types.KEYWORD_RETURN)) {
             return_stmt();
         }
     }
 
     private void assignment_or_func_call() {
-        if (peek(IDENTIFIER)) {
-            match(IDENTIFIER);
+        if (peek(Types.IDENTIFIER)) {
+            match(Types.IDENTIFIER);
             assignment_or_func_call_rest();
         }
     }
 
     private void assignment_or_func_call_rest() {
-        if (peek(OP_ASSIGNMENT)) {
+        if (peek(Types.OP_ASSIGNMENT)) {
             assignment();
         }
     }
 
     private void struct_stmt() {
-        if (peek(OPEN_BRACE)) {
+        if (peek(Types.OPEN_BRACE)) {
             comp_stmt();
-        } else if (peek(KEYWORD_IF)) {
+        } else if (peek(Types.KEYWORD_IF)) {
             cond();
-        } else if (peek(KEYWORD_WHILE)) {
+        } else if (peek(Types.KEYWORD_WHILE)) {
             loop();
         }
     }
 
     private void assignment() {
-        if (peek(OP_ASSIGNMENT)) {
-            match(OP_ASSIGNMENT);
+        if (peek(Types.OP_ASSIGNMENT)) {
+            match(Types.OP_ASSIGNMENT);
             expr();
         }
     }
 
     private void cond() {
-        if (peek(KEYWORD_IF)) {
-            match(KEYWORD_IF);
-            match(OPEN_ROUND);
+        if (peek(Types.KEYWORD_IF)) {
+            match(Types.KEYWORD_IF);
+            match(Types.OPEN_ROUND);
             expr();
-            match(CLOSE_ROUND);
-            match(KEYWORD_THEN);
+            match(Types.CLOSE_ROUND);
+            match(Types.KEYWORD_THEN);
             stmt();
             cond_rest();
         }
     }
 
     private void cond_rest() {
-        if (peek(KEYWORD_ENDIF)) {
-            match(KEYWORD_ENDIF);
-        } else if (peek(KEYWORD_ELSE)) {
-            match(KEYWORD_ELSE);
+        if (peek(Types.KEYWORD_ENDIF)) {
+            match(Types.KEYWORD_ENDIF);
+        } else if (peek(Types.KEYWORD_ELSE)) {
+            match(Types.KEYWORD_ELSE);
             stmt();
-            match(KEYWORD_ENDIF);
+            match(Types.KEYWORD_ENDIF);
         }
     }
 
     private void loop() {
-        if (peek(KEYWORD_WHILE)) {
-            match(KEYWORD_WHILE);
-            match(OPEN_ROUND);
+        if (peek(Types.KEYWORD_WHILE)) {
+            match(Types.KEYWORD_WHILE);
+            match(Types.OPEN_ROUND);
             expr();
-            match(CLOSE_ROUND);
+            match(Types.CLOSE_ROUND);
             stmt();
         }
     }
 
     private void func_call() {
-        if (peek(OPEN_ROUND)) {
-            match(OPEN_ROUND);
+        if (peek(Types.OPEN_ROUND)) {
+            match(Types.OPEN_ROUND);
             args();
-            match(CLOSE_ROUND);
+            match(Types.CLOSE_ROUND);
         }
     }
 
     private void args() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
+                peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
+                peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             arg_list();
         }
     }
 
     private void arg_list() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
+                peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
+                peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             expr();
             arg_list_rest();
         }
     }
 
     private void arg_list_rest() {
-        if (peek(COMMA)) {
-            match(COMMA);
+        if (peek(Types.COMMA)) {
+            match(Types.COMMA);
             arg_list();
         }
     }
 
     private void return_stmt() {
-        if (peek(KEYWORD_RETURN)) {
-            match(KEYWORD_RETURN);
+        if (peek(Types.KEYWORD_RETURN)) {
+            match(Types.KEYWORD_RETURN);
             expr();
         }
     }
 
     private void comp_stmt() {
-        if (peek(OPEN_BRACE)) {
-            match(OPEN_BRACE);
+        if (peek(Types.OPEN_BRACE)) {
+            match(Types.OPEN_BRACE);
             stmt_seq();
-            match(CLOSE_BRACE);
+            match(Types.CLOSE_BRACE);
         }
     }
 
     private void expr() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
+                peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
+                peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             simple_expr();
             expr_rest();
         }
     }
 
     private void expr_rest() {
-        if (peek(OP_EQ) || peek(OP_NEQ) || peek(OP_LT) || peek(OP_LE) || peek(OP_GT) || peek(OP_GE)) {
+        if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) ||
+                peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE)) {
             rel_op();
             simple_expr();
         }
     }
 
     private void simple_expr() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
+                peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
+                peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             term();
             simple_expr_rest();
         }
     }
 
     private void simple_expr_rest() {
-        if (peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_OR)) {
+        if (peek(Types.OP_PLUS) || peek(Types.OP_MINUS) || peek(Types.OP_OR)) {
             add_op();
             term();
             simple_expr_rest();
@@ -356,14 +368,16 @@ public class Parser {
     }
 
     private void term() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
+                peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
+                peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             factor();
             term_rest();
         }
     }
 
     private void term_rest() {
-        if (peek(OP_MUL) || peek(OP_DIV) || peek(OP_AND)) {
+        if (peek(Types.OP_MUL) || peek(Types.OP_DIV) || peek(Types.OP_AND)) {
             mul_op();
             factor();
             term_rest();
@@ -371,90 +385,90 @@ public class Parser {
     }
 
     private void factor() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(LIT_NUMBER)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER)) {
             const_val();
-        } else if (peek(OPEN_ROUND)) {
-            match(OPEN_ROUND);
+        } else if (peek(Types.OPEN_ROUND)) {
+            match(Types.OPEN_ROUND);
             expr();
-            match(CLOSE_ROUND);
-        } else if (peek(IDENTIFIER)) {
+            match(Types.CLOSE_ROUND);
+        } else if (peek(Types.IDENTIFIER)) {
             id_or_func_call();
-        } else if (peek(OP_PLUS) || peek(OP_MINUS)) {
+        } else if (peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
             sign();
             factor();
-        } else if (peek(OP_NOT)) {
-            match(OP_NOT);
+        } else if (peek(Types.OP_NOT)) {
+            match(Types.OP_NOT);
             factor();
         }
     }
 
     private void id_or_func_call() {
-        if (peek(IDENTIFIER)) {
-            match(IDENTIFIER);
+        if (peek(Types.IDENTIFIER)) {
+            match(Types.IDENTIFIER);
             id_or_func_call_rest();
         }
     }
 
     private void id_or_func_call_rest() {
-        if (peek(OPEN_ROUND)) {
+        if (peek(Types.OPEN_ROUND)) {
             func_call();
         }
     }
 
     private void sign() {
-        if (peek(OP_PLUS)) {
-            match(OP_PLUS);
-        } else if (peek(OP_MINUS)) {
-            match(OP_MINUS);
+        if (peek(Types.OP_PLUS)) {
+            match(Types.OP_PLUS);
+        } else if (peek(Types.OP_MINUS)) {
+            match(Types.OP_MINUS);
         }
     }
 
     private void mul_op() {
-        if (peek(OP_MUL)) {
-            match(OP_MUL);
-        } else if (peek(OP_DIV)) {
-            match(OP_DIV);
-        } else if (peek(OP_AND)) {
-            match(OP_AND);
+        if (peek(Types.OP_MUL)) {
+            match(Types.OP_MUL);
+        } else if (peek(Types.OP_DIV)) {
+            match(Types.OP_DIV);
+        } else if (peek(Types.OP_AND)) {
+            match(Types.OP_AND);
         }
     }
 
     private void add_op() {
-        if (peek(OP_PLUS)) {
-            match(OP_PLUS);
-        } else if (peek(OP_MINUS)) {
-            match(OP_MINUS);
-        } else if (peek(OP_OR)) {
-            match(OP_OR);
+        if (peek(Types.OP_PLUS)) {
+            match(Types.OP_PLUS);
+        } else if (peek(Types.OP_MINUS)) {
+            match(Types.OP_MINUS);
+        } else if (peek(Types.OP_OR)) {
+            match(Types.OP_OR);
         }
     }
 
     private void rel_op() {
-        if (peek(OP_EQ)) match(OP_EQ);
-        else if (peek(OP_NEQ)) match(OP_NEQ);
-        else if (peek(OP_LT)) match(OP_LT);
-        else if (peek(OP_LE)) match(OP_LE);
-        else if (peek(OP_GT)) match(OP_GT);
-        else if (peek(OP_GE)) match(OP_GE);
+        if (peek(Types.OP_EQ)) match(Types.OP_EQ);
+        else if (peek(Types.OP_NEQ)) match(Types.OP_NEQ);
+        else if (peek(Types.OP_LT)) match(Types.OP_LT);
+        else if (peek(Types.OP_LE)) match(Types.OP_LE);
+        else if (peek(Types.OP_GT)) match(Types.OP_GT);
+        else if (peek(Types.OP_GE)) match(Types.OP_GE);
     }
 
     private void const_val() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE)) {
+        if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE)) {
             bool_const();
-        } else if (peek(LIT_NUMBER)) {
+        } else if (peek(Types.LIT_NUMBER)) {
             number();
         }
     }
 
     private void number() {
-        if (peek(LIT_NUMBER)) {
-            match(LIT_NUMBER);
+        if (peek(Types.LIT_NUMBER)) {
+            match(Types.LIT_NUMBER);
         }
     }
 
     private void bool_const() {
-        if (peek(CONST_TRUE)) match(CONST_TRUE);
-        else if (peek(CONST_FALSE)) match(CONST_FALSE);
+        if (peek(Types.CONST_TRUE)) match(Types.CONST_TRUE);
+        else if (peek(Types.CONST_FALSE)) match(Types.CONST_FALSE);
     }
 
 
