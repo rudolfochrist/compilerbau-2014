@@ -6,38 +6,51 @@ import java.util.HashMap;
 
 public class Parser {
 
-    public static final String TYPE_INT = "int";
-    public static final String TYPE_BOOL = "bool";
-    public static final String OPEN_ROUND = "(";
-    public static final String COMMA = ",";
-    public static final String SEMICOLON = ";";
-    public static final String CLOSE_ROUND = ")";
-    public static final String OPEN_BRACE = "{";
-    public static final String CLOSE_BRACE = "}";
-    public static final String KEYWORD_RETURN = "return";
-    public static final String KEYWORD_IF = "if";
-    public static final String KEYWORD_WHILE = "while";
-    public static final String OP_ASSIGNMENT = ":=";
-    public static final String KEYWORD_THEN = "then";
-    public static final String KEYWORD_ENDIF = "fi";
-    public static final String CONST_TRUE = "true";
-    public static final String CONST_FALSE = "false";
-    public static final String OP_PLUS = "+";
-    public static final String OP_MINUS = "-";
-    public static final String LIT_NUMBER = "lit_number";
-    public static final String IDENTIFIER = "identifier";
-    public static final String OP_EQ = "=";
-    public static final String OP_NEQ = "!=";
-    public static final String OP_LT = "<";
-    public static final String OP_LE = "<=";
-    public static final String OP_GT = ">";
-    public static final String OP_GE = ">=";
-    public static final String OP_MUL = "*";
-    public static final String OP_DIV = "/";
-    public static final String OP_AND = "and";
-    public static final String OP_OR = "or";
-    public static final String OP_NOT = "not";
-    public static final String KEYWORD_ELSE = "else";
+    public static enum Types {
+        TYPE_INT("int"),
+        TYPE_BOOL("bool"),
+        OPEN_ROUND ("("),
+        COMMA(","),
+        SEMICOLON(";"),
+        CLOSE_ROUND(")"),
+        OPEN_BRACE("{"),
+        CLOSE_BRACE("}"),
+        KEYWORD_RETURN("return"),
+        KEYWORD_IF("if"),
+        KEYWORD_WHILE("while"),
+        OP_ASSIGNMENT("("),
+        KEYWORD_THEN("then"),
+        KEYWORD_ENDIF("fi"),
+        CONST_TRUE("true"),
+        CONST_FALSE("false"),
+        OP_PLUS("+"),
+        OP_MINUS("-"),
+        LIT_NUMBER("lit_number"),
+        IDENTIFIER("identifier"),
+        OP_EQ("="),
+        OP_NEQ("!="),
+        OP_LT("<"),
+        OP_LE("("),
+        OP_GT(">"),
+        OP_GE("("),
+        OP_MUL("*"),
+        OP_DIV("/"),
+        OP_AND("and"),
+        OP_OR("or"),
+        OP_NOT("not"),
+        KEYWORD_ELSE("else");
+
+        private final String value;
+
+        Types(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
+    }
+
     private Lexer scanner;
     private HashMap<String, Object> symbols;
     private String currentToken;
