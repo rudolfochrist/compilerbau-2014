@@ -24,16 +24,8 @@ public class Parser {
     public static final String CONST_FALSE = "false";
     public static final String OP_PLUS = "+";
     public static final String OP_MINUS = "-";
-    public static final String CONST_0 = "0";
-    public static final String CONST_1 = "1";
-    public static final String CONST_2 = "2";
-    public static final String CONST_3 = "3";
-    public static final String CONST_4 = "4";
-    public static final String CONST_5 = "5";
-    public static final String CONST_6 = "6";
-    public static final String CONST_7 = "7";
-    public static final String CONST_8 = "8";
-    public static final String CONST_9 = "9";
+    public static final String LIT_NUMBER = "lit_number";
+    public static final String IDENTIFIER = "identifier";
     public static final String OP_EQ = "=";
     public static final String OP_NEQ = "!=";
     public static final String OP_LT = "<";
@@ -48,6 +40,7 @@ public class Parser {
     public static final String KEYWORD_ELSE = "else";
     private Lexer scanner;
     private HashMap<String, Object> symbols;
+    private String currentToken;
 
     public Parser(Lexer scanner) {
         this.scanner = scanner;
@@ -55,9 +48,9 @@ public class Parser {
     }
 
     private boolean match(String token) {
-        if (token.equals(scanner.yytext())) {
+        if (token.equals(currentToken)) {
             try {
-                scanner.yylex();
+                currentToken = scanner.yylex();
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -66,30 +59,13 @@ public class Parser {
         return false;
     }
 
-    public boolean matchId() {
-        if (lookup(scanner.yytext()) != null) {
-            match(scanner.yytext());
-            return true;
-        }
-        return false;
-    }
-
-    private Object lookup(String symbol) {
-        return symbols.get(symbol);
-    }
-
     private boolean peek(String token) {
-        return token.equals(scanner.yytext());
+        return token.equals(currentToken);
     }
-
-    private boolean peekId() {
-        return lookup(scanner.yytext()) != null;
-    }
-
 
     public void parse() {
         try {
-            scanner.yylex();
+            currentToken = scanner.yylex();
             program();
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,7 +111,7 @@ public class Parser {
     private void type_id() {
         if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
             type();
-            matchId();
+            match(IDENTIFIER);
         }
     }
 
@@ -164,7 +140,7 @@ public class Parser {
     private void id_list() {
         if (peek(COMMA)) {
             match(COMMA);
-            matchId();
+            match(IDENTIFIER);
             id_list();
         }
     }
@@ -187,7 +163,7 @@ public class Parser {
     private void param_list() {
         if (peek(TYPE_INT) || peek(TYPE_BOOL)) {
             type();
-            matchId();
+            match(IDENTIFIER);
             param_list_rest();
         }
     }
@@ -209,14 +185,14 @@ public class Parser {
     }
 
     private void stmt_seq() {
-        if (peekId() || peek(KEYWORD_RETURN) || peek(OPEN_BRACE) || peek(KEYWORD_IF) || peek(KEYWORD_WHILE)) {
+        if (peek(IDENTIFIER) || peek(KEYWORD_RETURN) || peek(OPEN_BRACE) || peek(KEYWORD_IF) || peek(KEYWORD_WHILE)) {
             stmt();
             stmt_seq();
         }
     }
 
     private void stmt() {
-        if (peekId() || peek(KEYWORD_RETURN)) {
+        if (peek(IDENTIFIER) || peek(KEYWORD_RETURN)) {
             simple_stmt();
             match(SEMICOLON);
         } else if (peek(OPEN_BRACE) || peek(KEYWORD_IF) || peek(KEYWORD_WHILE)) {
@@ -225,7 +201,7 @@ public class Parser {
     }
 
     private void simple_stmt() {
-        if (peekId()) {
+        if (peek(IDENTIFIER)) {
             assignment_or_func_call();
         } else if (peek(KEYWORD_RETURN)) {
             return_stmt();
@@ -233,8 +209,8 @@ public class Parser {
     }
 
     private void assignment_or_func_call() {
-        if (peekId()) {
-            matchId();
+        if (peek(IDENTIFIER)) {
+            match(IDENTIFIER);
             assignment_or_func_call_rest();
         }
     }
@@ -303,15 +279,13 @@ public class Parser {
     }
 
     private void args() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peekId() || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
             arg_list();
         }
     }
 
     private void arg_list() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peekId() || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
             expr();
             arg_list_rest();
         }
@@ -340,8 +314,7 @@ public class Parser {
     }
 
     private void expr() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peekId() || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
             simple_expr();
             expr_rest();
         }
@@ -355,8 +328,7 @@ public class Parser {
     }
 
     private void simple_expr() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peekId() || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
             term();
             simple_expr_rest();
         }
@@ -371,8 +343,7 @@ public class Parser {
     }
 
     private void term() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peekId() || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(IDENTIFIER) || peek(OPEN_ROUND) || peek(OP_PLUS) || peek(OP_MINUS) || peek(OP_NOT) || peek(LIT_NUMBER)) {
             factor();
             term_rest();
         }
@@ -387,14 +358,13 @@ public class Parser {
     }
 
     private void factor() {
-        if (peek(CONST_TRUE) || peek(CONST_FALSE) ||
-                peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        if (peek(CONST_TRUE) || peek(CONST_FALSE) || peek(LIT_NUMBER)) {
             const_val();
         } else if (peek(OPEN_ROUND)) {
             match(OPEN_ROUND);
             expr();
             match(CLOSE_ROUND);
-        } else if (peekId()) {
+        } else if (peek(IDENTIFIER)) {
             id_or_func_call();
         } else if (peek(OP_PLUS) || peek(OP_MINUS)) {
             sign();
@@ -406,8 +376,8 @@ public class Parser {
     }
 
     private void id_or_func_call() {
-        if (peekId()) {
-            matchId();
+        if (peek(IDENTIFIER)) {
+            match(IDENTIFIER);
             id_or_func_call_rest();
         }
     }
@@ -458,22 +428,15 @@ public class Parser {
     private void const_val() {
         if (peek(CONST_TRUE) || peek(CONST_FALSE)) {
             bool_const();
-        } else if (peek(CONST_0) || peek(CONST_1) ||peek(CONST_2) ||peek(CONST_3) ||peek(CONST_4) ||peek(CONST_5) ||peek(CONST_6) ||peek(CONST_7) ||peek(CONST_8) ||peek(CONST_9)) {
+        } else if (peek(LIT_NUMBER)) {
             number();
         }
     }
 
     private void number() {
-        if (peek(CONST_0)) match(CONST_0);
-        else if (peek(CONST_1)) match(CONST_1);
-        else if (peek(CONST_2)) match(CONST_2);
-        else if (peek(CONST_3)) match(CONST_3);
-        else if (peek(CONST_4)) match(CONST_4);
-        else if (peek(CONST_5)) match(CONST_5);
-        else if (peek(CONST_6)) match(CONST_6);
-        else if (peek(CONST_7)) match(CONST_7);
-        else if (peek(CONST_8)) match(CONST_8);
-        else if (peek(CONST_9)) match(CONST_9);
+        if (peek(LIT_NUMBER)) {
+            match(LIT_NUMBER);
+        }
     }
 
     private void bool_const() {
