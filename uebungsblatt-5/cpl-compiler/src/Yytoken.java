@@ -1,6 +1,6 @@
 
 public class Yytoken {
-    private Parser.Types type;
+    private final Parser.Types type;
     private int ival;
     private double dval;
     private String sval;
@@ -32,12 +32,18 @@ public class Yytoken {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        Yytoken yytoken = (Yytoken) o;
+        final Yytoken yytoken = (Yytoken) o;
 
-        if (type != yytoken.type) return false;
+        if (type != yytoken.type) {
+            return false;
+        }
 
         return true;
     }
@@ -45,5 +51,10 @@ public class Yytoken {
     @Override
     public int hashCode() {
         return type.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Token with Type "+type;
     }
 }

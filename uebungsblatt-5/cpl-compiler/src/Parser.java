@@ -1,5 +1,3 @@
-import com.sun.javafx.fxml.expression.Expression;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,8 +51,8 @@ public class Parser {
         }
     }
 
-    private Lexer scanner;
-    private HashMap<String, Object> symbols;
+    private final Lexer scanner;
+    private final HashMap<String, Object> symbols;
     private Yytoken currentToken;
 
     public Parser(Lexer scanner) {
@@ -67,7 +65,7 @@ public class Parser {
             try {
                 currentToken = scanner.yylex();
                 return true;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
@@ -82,7 +80,7 @@ public class Parser {
         try {
             currentToken = scanner.yylex();
             program();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -193,9 +191,27 @@ public class Parser {
     private void body() {
         if (peek(Types.OPEN_BRACE)) {
             match(Types.OPEN_BRACE);
-            var_decl();
-            stmt_seq();
+            body_rest();
             match(Types.CLOSE_BRACE);
+        }
+    }
+
+    private void body_rest() {
+        if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) ||
+                peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE)) {
+            stmt_seq();
+        } else if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
+            var_decl_body();
+            stmt_seq();
+        }
+    }
+
+    private void var_decl_body() {
+        if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
+            type_id();
+            id_list();
+            match(Types.SEMICOLON);
+            var_decl_body();
         }
     }
 
@@ -444,12 +460,19 @@ public class Parser {
     }
 
     private void rel_op() {
-        if (peek(Types.OP_EQ)) match(Types.OP_EQ);
-        else if (peek(Types.OP_NEQ)) match(Types.OP_NEQ);
-        else if (peek(Types.OP_LT)) match(Types.OP_LT);
-        else if (peek(Types.OP_LE)) match(Types.OP_LE);
-        else if (peek(Types.OP_GT)) match(Types.OP_GT);
-        else if (peek(Types.OP_GE)) match(Types.OP_GE);
+        if (peek(Types.OP_EQ)) {
+            match(Types.OP_EQ);
+        } else if (peek(Types.OP_NEQ)) {
+            match(Types.OP_NEQ);
+        } else if (peek(Types.OP_LT)) {
+            match(Types.OP_LT);
+        } else if (peek(Types.OP_LE)) {
+            match(Types.OP_LE);
+        } else if (peek(Types.OP_GT)) {
+            match(Types.OP_GT);
+        } else if (peek(Types.OP_GE)) {
+            match(Types.OP_GE);
+        }
     }
 
     private void const_val() {
@@ -467,8 +490,11 @@ public class Parser {
     }
 
     private void bool_const() {
-        if (peek(Types.CONST_TRUE)) match(Types.CONST_TRUE);
-        else if (peek(Types.CONST_FALSE)) match(Types.CONST_FALSE);
+        if (peek(Types.CONST_TRUE)) {
+            match(Types.CONST_TRUE);
+        } else if (peek(Types.CONST_FALSE)) {
+            match(Types.CONST_FALSE);
+        }
     }
 
 
@@ -478,7 +504,7 @@ public class Parser {
             System.exit(0);
         }
 
-        InputStreamReader reader = new InputStreamReader(new FileInputStream(argv[0]));
+        final InputStreamReader reader = new InputStreamReader(new FileInputStream(argv[0]));
         new Parser(new Lexer(reader)).parse();
     }
 }

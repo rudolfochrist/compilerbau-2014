@@ -31,8 +31,16 @@
 
 %class Lexer
 %line
+%debug
+%type Yytoken
 
 %%
+
+//"/\*.*\*/"        {print("comment: "); }
+
+"/*" [^*] ~"*/"       {print("Comment1: "+yytext());}
+"/*" "*"+ "/"         {print("Comment2: "+yytext());}
+
 
 "true"            { print(yytext()); return t(Parser.Types.CONST_TRUE); }
 "false"           { print(yytext()); return t(Parser.Types.CONST_FALSE); }
@@ -74,8 +82,6 @@
                       return t(Parser.Types.IDENTIFIER, yytext().substring(0, 8));
                    }
                    return t(Parser.Types.IDENTIFIER); }
-
-"/\*.*\*/"        { print(yytext()); }
 
 [\t ]+ { print(yytext()); }
 
