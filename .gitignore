@@ -5,4 +5,4 @@
 *.class
 /uebungsblatt-5/cpl-compiler/src/Lexer.java~
 /uebungsblatt-5/cpl-compiler/out/
-/uebungsblatt-5/cpl-compiler/cpl-compiler-listing.txt
+*cpl-compiler-listing.txt
