@@ -1,10 +1,10 @@
+import java.io.PrintWriter;
 
 %%
 
 %{
-  private Parser parser;
-
   private int lineno = 1;
+  private PrintWriter writer;
 
   public Yytoken t(Parser.Types type) {
       return new Yytoken(type);
@@ -19,7 +19,12 @@
   }
 
   public void print(String sym) {
-    System.out.print(sym);
+    if (writer == null) writer = new PrintWriter(System.out);
+    writer.print(sym);
+  }
+
+  public Lexer(PrintWriter writer) {
+    this.writer = writer;
   }
 
 %}
