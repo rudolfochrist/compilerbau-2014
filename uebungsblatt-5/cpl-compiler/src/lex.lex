@@ -21,9 +21,11 @@ import java.io.PrintWriter;
   public void print(String sym) {
     if (writer == null) writer = new PrintWriter(System.out);
     writer.print(sym);
+    writer.flush();
   }
 
-  public Lexer(PrintWriter writer) {
+  public Lexer(java.io.Reader r, PrintWriter writer) {
+    this(r);
     this.writer = writer;
   }
 

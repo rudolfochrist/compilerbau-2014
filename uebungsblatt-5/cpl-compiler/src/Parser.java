@@ -1,8 +1,6 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Parser {
 
@@ -496,13 +494,18 @@ public class Parser {
     }
 
 
-    public static void main(String[] argv) throws FileNotFoundException {
+    public static void main(String[] argv) throws IOException {
         if (argv.length == 0) {
             System.out.println("Please provide a file");
             System.exit(0);
         }
 
         final InputStreamReader reader = new InputStreamReader(new FileInputStream(argv[0]));
-        new Parser(new Lexer(reader)).parse();
+        String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
+                + "-cpl-compiler-listing.txt";
+        PrintWriter writer = new PrintWriter(filename, "UTF-8");
+        new Parser(new Lexer(reader, writer)).parse();
+        reader.close();
+        writer.close();
     }
 }
