@@ -52,12 +52,10 @@ public class Parser {
     }
 
     private final Lexer scanner;
-    private final HashMap<String, Object> symbols;
     private Yytoken currentToken;
 
     public Parser(Lexer scanner) {
         this.scanner = scanner;
-        symbols = new HashMap<String, Object>();
     }
 
     private boolean match(Types tokenType) {
