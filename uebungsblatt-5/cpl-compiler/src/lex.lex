@@ -80,12 +80,12 @@ import java.io.PrintWriter;
 ";"               { print(yytext()); return t(Parser.Types.SEMICOLON); }
 "then"            { print(yytext()); return t(Parser.Types.KEYWORD_THEN); }
 "fi"              { print(yytext()); return t(Parser.Types.KEYWORD_ENDIF); }
-"\n"              { print(yytext()); print("" + lineno++); print(": "); }
+"\n"              { print(yytext()); print("" + ++lineno); print(": "); }
 
 [a-z][a-zA-Z0-9_]* {
                    print(yytext());
                    if (yytext().length() > 8) {
-                      print("Identifier too long. Truncate it.");
+                      print("Identifier '"+yytext()+"' is too long. It will be truncated to the first 8 characters '"+yytext().substring(0,8)+"'.");
                       return t(Parser.Types.IDENTIFIER, yytext().substring(0, 8));
                    }
                    return t(Parser.Types.IDENTIFIER, yytext()); }
