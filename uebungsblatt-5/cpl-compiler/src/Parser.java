@@ -1,4 +1,7 @@
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -97,7 +100,7 @@ public class Parser {
     private void decl_part_rest() {
         if (peek(Types.OPEN_ROUND)) {
             decl_part_func();
-        } else if (peek(Types.COMMA)) {
+        } else if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             var_decl();
             decl_part_func();
         }
@@ -125,7 +128,7 @@ public class Parser {
     }
 
     private void var_decl() {
-        if (peek(Types.COMMA)) {
+        if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             id_list();
             match(Types.SEMICOLON);
             type_id();
@@ -133,7 +136,7 @@ public class Parser {
         }
     }
     private void var_decl_rest() {
-        if (peek(Types.COMMA)) {
+        if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             var_decl();
         }
     }
@@ -501,9 +504,9 @@ public class Parser {
         }
 
         final InputStreamReader reader = new InputStreamReader(new FileInputStream(argv[0]));
-        String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
+        final String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
                 + "-cpl-compiler-listing.txt";
-        PrintWriter writer = new PrintWriter(filename, "UTF-8");
+        final PrintWriter writer = new PrintWriter(filename, "UTF-8");
         new Parser(new Lexer(reader, writer)).parse();
         reader.close();
         writer.close();
