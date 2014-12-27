@@ -53,10 +53,14 @@ public class Parser {
     }
 
     private final Lexer scanner;
+    private final Symboltable symbols;
+    private final Parsercontext context;
     private Yytoken currentToken;
 
     public Parser(Lexer scanner) {
         this.scanner = scanner;
+        symbols = new Symboltable();
+        context = new Parsercontext();
     }
 
     private boolean match(Types tokenType) {
@@ -79,6 +83,7 @@ public class Parser {
         try {
             currentToken = scanner.yylex();
             program();
+            // System.out.println(symbols); // Print all found symbols (for debug)
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -108,6 +113,8 @@ public class Parser {
 
     private void decl_part_func() {
         if (peek(Types.OPEN_ROUND)) {
+            symbols.addFunction(context);
+            context.currentScope = context.lastFoundIdentifier.value();
             func_decl();
             decl_part_func_rest();
         }
@@ -123,13 +130,14 @@ public class Parser {
     private void type_id() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type();
-            match(Types.IDENTIFIER);
+            id();
         }
     }
 
     private void var_decl() {
         if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             id_list();
+            symbols.addVariable(context);
             match(Types.SEMICOLON);
             type_id();
             var_decl_rest();
@@ -142,17 +150,23 @@ public class Parser {
     }
 
     private void type() {
+        final Yytoken token = currentToken;
         if (peek(Types.TYPE_INT)) {
-            match(Types.TYPE_INT);
+            if (match(Types.TYPE_INT)) {
+                context.lastFoundType = token;
+            }
         } else if (peek(Types.TYPE_BOOL)) {
-            match(Types.TYPE_BOOL);
+            if (match(Types.TYPE_BOOL)) {
+                context.lastFoundType = token;
+            }
         }
     }
 
     private void id_list() {
         if (peek(Types.COMMA)) {
+            symbols.addVariable(context);
             match(Types.COMMA);
-            match(Types.IDENTIFIER);
+            id();
             id_list();
         }
     }
@@ -174,8 +188,8 @@ public class Parser {
 
     private void param_list() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
-            type();
-            match(Types.IDENTIFIER);
+            type_id();
+            symbols.addVariable(context);
             param_list_rest();
         }
     }
@@ -209,6 +223,7 @@ public class Parser {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
             id_list();
+            symbols.addVariable(context);
             match(Types.SEMICOLON);
             var_decl_body();
         }
@@ -241,8 +256,15 @@ public class Parser {
 
     private void assignment_or_func_call() {
         if (peek(Types.IDENTIFIER)) {
-            match(Types.IDENTIFIER);
+            id();
             assignment_or_func_call_rest();
+        }
+    }
+
+    private void id() {
+        final Yytoken token = currentToken;
+        if(match(Types.IDENTIFIER)) {
+            context.lastFoundIdentifier = token;
         }
     }
 
@@ -419,7 +441,7 @@ public class Parser {
 
     private void id_or_func_call() {
         if (peek(Types.IDENTIFIER)) {
-            match(Types.IDENTIFIER);
+            id();
             id_or_func_call_rest();
         }
     }
