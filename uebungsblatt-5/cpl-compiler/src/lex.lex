@@ -88,7 +88,7 @@ import java.io.PrintWriter;
                       print("Identifier too long. Truncate it.");
                       return t(Parser.Types.IDENTIFIER, yytext().substring(0, 8));
                    }
-                   return t(Parser.Types.IDENTIFIER); }
+                   return t(Parser.Types.IDENTIFIER, yytext()); }
 
 [\t ]+ { print(yytext()); }
 
