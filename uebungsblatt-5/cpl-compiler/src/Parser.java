@@ -19,7 +19,7 @@ public class Parser {
         KEYWORD_RETURN("return"),
         KEYWORD_IF("if"),
         KEYWORD_WHILE("while"),
-        OP_ASSIGNMENT("("),
+        OP_ASSIGNMENT(":="),
         KEYWORD_THEN("then"),
         KEYWORD_ENDIF("fi"),
         CONST_TRUE("true"),
