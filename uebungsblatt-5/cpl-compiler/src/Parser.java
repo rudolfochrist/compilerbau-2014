@@ -94,7 +94,7 @@ public class Parser {
             decl_part();
         } else if (currentToken == null) {
             // null == $
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -105,7 +105,7 @@ public class Parser {
             type_id();
             decl_part_rest();
         } else if (currentToken == null) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -118,7 +118,7 @@ public class Parser {
             var_decl();
             decl_part_func();
         } else if (currentToken == null) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.OPEN_ROUND, Types.COMMA, Types.SEMICOLON);
         }
@@ -131,7 +131,7 @@ public class Parser {
             func_decl();
             decl_part_func_rest();
         } else if (currentToken == null) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_ROUND);
         }
@@ -142,7 +142,7 @@ public class Parser {
             type_id();
             decl_part_func();
         } else if (currentToken == null) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -153,7 +153,7 @@ public class Parser {
             type();
             id();
         } else if (peek(Types.OPEN_ROUND) || peek(Types.COMMA)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -167,7 +167,7 @@ public class Parser {
             type_id();
             var_decl_rest();
         } else if (peek(Types.OPEN_ROUND)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.COMMA, Types.SEMICOLON);
         }
@@ -176,7 +176,7 @@ public class Parser {
         if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             var_decl();
         } else if (peek(Types.OPEN_ROUND)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.COMMA, Types.SEMICOLON);
         }
@@ -193,7 +193,7 @@ public class Parser {
                 context.lastFoundType = token;
             }
         } else if (peek(Types.IDENTIFIER)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -206,7 +206,7 @@ public class Parser {
             id();
             id_list();
         } else if (peek(Types.SEMICOLON)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.COMMA);
         }
@@ -219,7 +219,7 @@ public class Parser {
             match(Types.CLOSE_ROUND);
             body();
         } else if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL) || currentToken == null) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_ROUND);
         }
@@ -229,7 +229,7 @@ public class Parser {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             param_list();
         } else if (peek(Types.CLOSE_ROUND)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -241,7 +241,7 @@ public class Parser {
             symbols.addVariable(context);
             param_list_rest();
         } else if (peek(Types.CLOSE_ROUND)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -252,7 +252,7 @@ public class Parser {
             match(Types.COMMA);
             param_list();
         } else if (peek(Types.CLOSE_ROUND)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.COMMA);
         }
@@ -264,7 +264,7 @@ public class Parser {
             body_rest();
             match(Types.CLOSE_BRACE);
         } else if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL) || currentToken == null) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_BRACE);
         }
@@ -278,7 +278,7 @@ public class Parser {
             var_decl_body();
             stmt_seq();
         } else if (peek(Types.CLOSE_BRACE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.IDENTIFIER, Types.KEYWORD_RETURN, Types.OPEN_BRACE, Types.KEYWORD_IF, Types.KEYWORD_WHILE, Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -292,7 +292,7 @@ public class Parser {
             match(Types.SEMICOLON);
             var_decl_body();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE) || peek(Types.CLOSE_BRACE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.TYPE_INT, Types.TYPE_BOOL);
         }
@@ -304,7 +304,7 @@ public class Parser {
             stmt();
             stmt_seq();
         } else if (peek(Types.CLOSE_BRACE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.IDENTIFIER, Types.KEYWORD_RETURN, Types.OPEN_BRACE, Types.KEYWORD_IF, Types.KEYWORD_WHILE);
         }
@@ -317,7 +317,7 @@ public class Parser {
         } else if (peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE)) {
             struct_stmt();
         } else if (peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.IDENTIFIER, Types.KEYWORD_RETURN, Types.OPEN_BRACE, Types.KEYWORD_IF, Types.KEYWORD_WHILE);
         }
@@ -329,7 +329,7 @@ public class Parser {
         } else if (peek(Types.KEYWORD_RETURN)) {
             return_stmt();
         } else if (peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.IDENTIFIER, Types.KEYWORD_RETURN);
         }
@@ -340,7 +340,7 @@ public class Parser {
             id();
             assignment_or_func_call_rest();
         } else if (peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.IDENTIFIER);
         }
@@ -358,7 +358,7 @@ public class Parser {
         if (peek(Types.OP_ASSIGNMENT)) {
             assignment();
         } else if (peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_ASSIGNMENT);
         }
@@ -372,7 +372,7 @@ public class Parser {
         } else if (peek(Types.KEYWORD_WHILE)) {
             loop();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_BRACE, Types.KEYWORD_IF, Types.KEYWORD_WHILE);
         }
@@ -383,7 +383,7 @@ public class Parser {
             match(Types.OP_ASSIGNMENT);
             expr();
         } else if (peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_ASSIGNMENT);
         }
@@ -399,7 +399,7 @@ public class Parser {
             stmt();
             cond_rest();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_WHILE) || peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.KEYWORD_IF);
         }
@@ -413,7 +413,7 @@ public class Parser {
             stmt();
             match(Types.KEYWORD_ENDIF);
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_WHILE) || peek(Types.CLOSE_BRACE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.KEYWORD_ENDIF, Types.KEYWORD_ELSE);
         }
@@ -427,7 +427,7 @@ public class Parser {
             match(Types.CLOSE_ROUND);
             stmt();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.KEYWORD_WHILE);
         }
@@ -441,7 +441,7 @@ public class Parser {
         } else if (peek(Types.OP_MUL) || peek(Types.OP_DIV) || peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) || peek(Types.OP_OR) ||
                 peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE) ||
                 peek(Types.COMMA) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_ROUND);
         }
@@ -453,7 +453,7 @@ public class Parser {
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             arg_list();
         } else if (peek(Types.CLOSE_ROUND)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
@@ -466,7 +466,7 @@ public class Parser {
             expr();
             arg_list_rest();
         } else if (peek(Types.CLOSE_ROUND)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
@@ -477,7 +477,7 @@ public class Parser {
             match(Types.COMMA);
             arg_list();
         } else if (peek(Types.CLOSE_ROUND)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.COMMA);
         }
@@ -488,7 +488,7 @@ public class Parser {
             match(Types.KEYWORD_RETURN);
             expr();
         } else if (peek(Types.SEMICOLON)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.KEYWORD_RETURN);
         }
@@ -501,7 +501,7 @@ public class Parser {
             match(Types.CLOSE_BRACE);
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE) || peek(Types.CLOSE_BRACE) ||
                 peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_BRACE);
         }
@@ -514,7 +514,7 @@ public class Parser {
             simple_expr();
             expr_rest();
         } else if (peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
@@ -526,7 +526,7 @@ public class Parser {
             rel_op();
             simple_expr();
         } else if (peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
-            // sync
+            sync();
         } else {
             throwParseError(Types.OP_EQ, Types.OP_NEQ, Types.OP_LT, Types.OP_LE, Types.OP_GT, Types.OP_GE);
         }
@@ -540,7 +540,7 @@ public class Parser {
             simple_expr_rest();
         } else if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE) ||
                 peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
@@ -553,7 +553,7 @@ public class Parser {
             simple_expr_rest();
         } else if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE) ||
                 peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_PLUS, Types.OP_MINUS, Types.OP_OR);
         }
@@ -567,7 +567,7 @@ public class Parser {
             term_rest();
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
@@ -580,7 +580,7 @@ public class Parser {
             term_rest();
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_MUL, Types.OP_DIV, Types.OP_AND);
         }
@@ -604,7 +604,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.LIT_NUMBER, Types.OPEN_ROUND, Types.IDENTIFIER, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT);
         }
@@ -617,7 +617,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         }  else {
             throwParseError(Types.IDENTIFIER);
         }
@@ -629,7 +629,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OPEN_ROUND);
         }
@@ -642,7 +642,7 @@ public class Parser {
             match(Types.OP_MINUS);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_PLUS, Types.OP_MINUS);
         }
@@ -657,7 +657,7 @@ public class Parser {
             match(Types.OP_AND);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_MUL, Types.OP_DIV, Types.OP_AND);
         }
@@ -692,7 +692,7 @@ public class Parser {
             match(Types.OP_GE);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.OP_EQ, Types.OP_NEQ, Types.OP_LT, Types.OP_LE, Types.OP_GT, Types.OP_GE);
         }
@@ -706,7 +706,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.LIT_NUMBER);
         }
@@ -718,7 +718,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.LIT_NUMBER);
         }
@@ -732,7 +732,7 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            //sync
+            sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE);
         }
@@ -756,6 +756,11 @@ public class Parser {
         sb.append(currentToken.getType().value());
         sb.append(".");
         return sb.toString();
+    }
+
+    private void sync() {
+        String tokenString = (currentToken != null) ? currentToken.getType().value() : "$";
+        scanner.messages.warning(scanner.lineno, String.format("Sync on %s", tokenString));
     }
 
 
