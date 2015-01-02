@@ -126,7 +126,12 @@ public class Parser {
 
     private void decl_part_func() {
         if (peek(Types.OPEN_ROUND)) {
-            symbols.addFunction(context);
+            try {
+                symbols.addFunction(context);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if symbol name already exists ?
+            }
             context.currentScope = context.lastFoundIdentifier.value();
             func_decl();
             decl_part_func_rest();
@@ -162,7 +167,12 @@ public class Parser {
     private void var_decl() {
         if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             id_list();
-            symbols.addVariable(context);
+            try {
+                symbols.addVariable(context);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if symbol name already exists ?
+            }
             match(Types.SEMICOLON);
             type_id();
             var_decl_rest();
@@ -201,7 +211,12 @@ public class Parser {
 
     private void id_list() {
         if (peek(Types.COMMA)) {
-            symbols.addVariable(context);
+            try {
+                symbols.addVariable(context);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if symbol name already exists ?
+            }
             match(Types.COMMA);
             id();
             id_list();
@@ -238,7 +253,12 @@ public class Parser {
     private void param_list() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
-            symbols.addVariable(context);
+            try {
+                symbols.addVariable(context);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if symbol name already exists ?
+            }
             param_list_rest();
         } else if (peek(Types.CLOSE_ROUND)) {
             sync();
@@ -288,7 +308,12 @@ public class Parser {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
             id_list();
-            symbols.addVariable(context);
+            try {
+                symbols.addVariable(context);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if symbol name already exists ?
+            }
             match(Types.SEMICOLON);
             var_decl_body();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE) || peek(Types.CLOSE_BRACE)) {
@@ -743,10 +768,10 @@ public class Parser {
     }
 
     private String parserMessage(Types... expected) {
-        StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer();
         sb.append("Expected one of [");
         for (int i = 0; i < expected.length; i++) {
-            Types t = expected[i];
+            final Types t = expected[i];
             sb.append(t.value());
             if (i < expected.length - 1) {
                 sb.append(", ");
@@ -759,7 +784,7 @@ public class Parser {
     }
 
     private void sync() {
-        String tokenString = (currentToken != null) ? currentToken.getType().value() : "$";
+        final String tokenString = (currentToken != null) ? currentToken.getType().value() : "$";
         scanner.messages.warning(scanner.lineno, String.format("Sync on %s", tokenString));
     }
 
@@ -774,10 +799,10 @@ public class Parser {
         final String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
                 + "-cpl-compiler-listing.txt";
         final PrintWriter writer = new PrintWriter(filename, "UTF-8");
-        Lexer lexer = new Lexer(reader, writer);
+        final Lexer lexer = new Lexer(reader, writer);
         try {
             new Parser(lexer).parse();
-        } catch (ParserException e) {
+        } catch (final ParserException e) {
             // print pending messages
             writer.println(); // Line feed. Exceptions skips unread newlines. Just for aesthetic reasons.
             lexer.messages.print(lexer.lineno, writer);

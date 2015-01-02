@@ -13,7 +13,7 @@ public class Symbol {
     private final Yytoken identifiertype;
 
     /** Type of the symbol (function/variable) */
-    private Symboltype symboltype;
+    private final Symboltype symboltype;
 
     /** Scope of the symbol (name of the function in which it is valid, null = global) */
     private final String scope;
@@ -42,11 +42,6 @@ public class Symbol {
 
     public String scope() {
         return scope;
-    }
-
-    public Symbol setSymboltype(Symboltype symboltype) {
-        this.symboltype = symboltype;
-        return this;
     }
 
     public String getIdentifierName() {
