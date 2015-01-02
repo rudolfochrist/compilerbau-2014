@@ -739,12 +739,12 @@ public class Parser {
     }
 
     private void throwParseError(Types... types) {
-        throw new ParserException(parserMessage(types));
+        throw new ParserException("ERROR: " + parserMessage(types));
     }
 
     private String parserMessage(Types... expected) {
         StringBuffer sb = new StringBuffer();
-        sb.append("Expected on of [");
+        sb.append("Expected one of [");
         for (int i = 0; i < expected.length; i++) {
             Types t = expected[i];
             sb.append(t.value());
