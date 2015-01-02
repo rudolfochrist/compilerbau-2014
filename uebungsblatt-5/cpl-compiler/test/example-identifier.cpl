@@ -1,0 +1,10 @@
+/* Test file for long identifier names */
+ int this_is_a_very_long_identifier_name;
+ bool gt5() {
+   this_is_a_very_long_identifier_name := 5;
+   !!-
+   if (this_is_a_very_long_identifier_name > 5) then {
+     return true;
+   }
+   return false;
+ }
