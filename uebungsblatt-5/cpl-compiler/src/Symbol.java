@@ -48,6 +48,14 @@ public class Symbol {
         return identifier.value();
     }
 
+    public boolean isVariable() {
+        return symboltype == Symboltype.VARIABLE;
+    }
+
+    public boolean isFunction() {
+        return symboltype == Symboltype.FUNCTION;
+    }
+
     @Override
     public String toString() {
         return "Symbol: Identifier "+identifier.value()+", "+identifiertype.getType()+", "+symboltype+", scope: "+scope;

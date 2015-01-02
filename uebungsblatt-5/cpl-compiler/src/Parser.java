@@ -406,6 +406,12 @@ public class Parser {
     private void assignment() {
         if (peek(Types.OP_ASSIGNMENT)) {
             match(Types.OP_ASSIGNMENT);
+            try {
+                symbols.verifyVariableWasDeclared(context.lastFoundIdentifier, context.currentScope);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if this occurs
+            }
             expr();
         } else if (peek(Types.SEMICOLON)) {
             sync();

@@ -72,19 +72,32 @@ public class Symboltable {
      */
     private void checkValidName(String scope, String name) throws SymbolException {
 
-        Map<String, Symbol> map;
-        if (scope != null) {
-            // current scope is a function
-            map = new HashMap<>(functions.get(scope));
-            // add global symbols to temporary map to check if the local identifier is already declared as global identifier
-            map.putAll(symbols);
-        } else {
-            // current scope is global scope
-            map = symbols;
-        }
-
+        final Map<String, Symbol> map = getContextMap(scope);
         if (map.containsKey(name)) {
             throw new SymbolException("Identifier '"+name+"' is invalid because it is already taken.");
+        }
+    }
+
+    Map<String, Symbol> getContextMap(String scope) {
+        if (scope == null) {
+            // global scope
+            return symbols;
+        }
+
+        // return function scope + global scope
+        final Map<String, Symbol> result = new HashMap<String, Symbol>(symbols);
+        result.putAll(functions.get(scope));
+        return result;
+    }
+
+    public void verifyVariableWasDeclared(Yytoken identifier, String scope) throws SymbolException {
+        final Symbol symbol = getContextMap(scope).get(identifier.value());
+        if (symbol == null) {
+            throw new SymbolException("Identifier '"+identifier.value()+"' was not declared.");
+        }
+
+        if (!symbol.isVariable()) {
+            throw new SymbolException("Cannot assign a value to identifier '"+identifier.value()+"' because it is not a variable.");
         }
     }
 
