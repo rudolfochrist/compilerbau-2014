@@ -521,7 +521,7 @@ public class Parser {
     private void addParserWarning(Yytoken actual, Types... expected) {
         StringBuffer sb = new StringBuffer();
         sb.append("PARSER WARNING: ");
-        sb.append("Expected on of ");
+        sb.append("Expected on of [");
         for (int i = 0; i < expected.length; i++) {
             Types t = expected[i];
             sb.append(t.value());
@@ -529,7 +529,7 @@ public class Parser {
                 sb.append(", ");
             }
         }
-        sb.append( " but got ");
+        sb.append( "] but got ");
         sb.append(actual.value());
         sb.append(".");
     }
