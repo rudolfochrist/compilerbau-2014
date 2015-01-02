@@ -1,4 +1,6 @@
 
+
+
 public class Yytoken {
     private final Parser.Types type;
     private int ival;
@@ -30,6 +32,23 @@ public class Yytoken {
         this.oval = oval;
     }
 
+    public String value() {
+        if (sval != null) {
+            return sval;
+        }
+        if (oval != null) {
+            return oval.toString();
+        }
+        if (ival != 0) {
+            return ""+ival;
+        }
+        return ""+dval;
+    }
+
+    public Parser.Types getType() {
+        return type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -55,6 +74,6 @@ public class Yytoken {
 
     @Override
     public String toString() {
-        return "Token with Type "+type;
+        return "Token with type "+type + " and value "+value();
     }
 }
