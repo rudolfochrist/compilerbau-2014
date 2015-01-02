@@ -72,7 +72,7 @@ public class Parser {
                 e.printStackTrace();
             }
         }
-        return false;
+        throw new ParserException(String.format("PARSER ERROR: Tried to match %s but was %s\nAborting...", tokenType.value(), currentToken.getType().value()));
     }
 
     private boolean peek(Types tokenType) {
@@ -577,8 +577,22 @@ public class Parser {
         final String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
                 + "-cpl-compiler-listing.txt";
         final PrintWriter writer = new PrintWriter(filename, "UTF-8");
-        new Parser(new Lexer(reader, writer)).parse();
+        Lexer lexer = new Lexer(reader, writer);
+        try {
+            new Parser(lexer).parse();
+        } catch (ParserException e) {
+            // print pending messages
+            writer.println(); // Line feed. Exceptions skips unread newlines. Just for aesthetic reasons.
+            lexer.messages.print(lexer.lineno, writer);
+            writer.println(e.getMessage());
+        }
         reader.close();
         writer.close();
+    }
+
+    static class ParserException extends RuntimeException {
+        public ParserException(String message) {
+            super(message);
+        }
     }
 }
