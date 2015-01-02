@@ -3,9 +3,9 @@ import java.io.PrintWriter;
 %%
 
 %{
-  private int lineno = 1;
+  public int lineno = 1;
   private PrintWriter writer;
-  private final Messages messages = new Messages();
+  public final Messages messages = new Messages();
 
   public Yytoken t(Parser.Types type) {
       return new Yytoken(type);
