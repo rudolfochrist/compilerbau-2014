@@ -93,4 +93,4 @@ import java.io.PrintWriter;
 
 [\t ]+ { print(yytext()); }
 
-. { print("error: unexpected token " + yytext()); }
+. { print(yytext()); messages.warning(lineno, "Unexpected character found: " + yytext()); }
