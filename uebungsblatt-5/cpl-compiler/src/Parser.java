@@ -92,6 +92,8 @@ public class Parser {
     private void program() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             decl_part();
+        } else {
+            // epsilon
         }
     }
 
@@ -124,6 +126,8 @@ public class Parser {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type_id();
             decl_part_func();
+        } else {
+            // epsilon
         }
     }
 
@@ -146,6 +150,8 @@ public class Parser {
     private void var_decl_rest() {
         if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             var_decl();
+        } else {
+            // epsilon
         }
     }
 
@@ -168,6 +174,8 @@ public class Parser {
             match(Types.COMMA);
             id();
             id_list();
+        } else {
+            // epsilon
         }
     }
 
@@ -183,6 +191,8 @@ public class Parser {
     private void params() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             param_list();
+        } else {
+            // epsilon
         }
     }
 
@@ -198,6 +208,8 @@ public class Parser {
         if (peek(Types.COMMA)) {
             match(Types.COMMA);
             param_list();
+        } else {
+            // epsilon
         }
     }
 
@@ -216,6 +228,8 @@ public class Parser {
         } else if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             var_decl_body();
             stmt_seq();
+        } else {
+            // epsilon
         }
     }
 
@@ -226,6 +240,8 @@ public class Parser {
             symbols.addVariable(context);
             match(Types.SEMICOLON);
             var_decl_body();
+        } else {
+            // epsilon
         }
     }
 
@@ -234,6 +250,8 @@ public class Parser {
                 peek(Types.KEYWORD_IF) || peek(Types.KEYWORD_WHILE)) {
             stmt();
             stmt_seq();
+        } else {
+            // epsilon
         }
     }
 
@@ -271,6 +289,8 @@ public class Parser {
     private void assignment_or_func_call_rest() {
         if (peek(Types.OP_ASSIGNMENT)) {
             assignment();
+        } else {
+            // epsilon
         }
     }
 
@@ -336,6 +356,8 @@ public class Parser {
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
             arg_list();
+        } else {
+            // epsilon
         }
     }
 
@@ -352,6 +374,8 @@ public class Parser {
         if (peek(Types.COMMA)) {
             match(Types.COMMA);
             arg_list();
+        } else {
+            // epsilon
         }
     }
 
@@ -384,6 +408,8 @@ public class Parser {
                 peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE)) {
             rel_op();
             simple_expr();
+        } else {
+            // epsilon
         }
     }
 
@@ -401,6 +427,8 @@ public class Parser {
             add_op();
             term();
             simple_expr_rest();
+        } else {
+            // epsilon
         }
     }
 
@@ -418,6 +446,8 @@ public class Parser {
             mul_op();
             factor();
             term_rest();
+        } else {
+            // epsilon
         }
     }
 
@@ -443,6 +473,8 @@ public class Parser {
         if (peek(Types.IDENTIFIER)) {
             id();
             id_or_func_call_rest();
+        }  else {
+            // epsilon
         }
     }
 
