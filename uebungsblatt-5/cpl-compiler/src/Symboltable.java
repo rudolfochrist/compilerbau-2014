@@ -97,7 +97,18 @@ public class Symboltable {
         }
 
         if (!symbol.isVariable()) {
-            throw new SymbolException("Cannot assign a value to identifier '"+identifier.value()+"' because it is not a variable.");
+            throw new SymbolException("Identifier '"+identifier.value()+"' cannot be used here because is not a variable name.");
+        }
+    }
+
+    public void verifyFunctionWasDeclared(Yytoken identifier) throws SymbolException {
+        final Symbol symbol = getContextMap(null).get(identifier.value());
+        if (symbol == null) {
+            throw new SymbolException("Identifier '"+identifier.value()+"' was not declared.");
+        }
+
+        if (!symbol.isFunction()) {
+            throw new SymbolException("Identifier '"+identifier.value()+"' cannot be used here because it is not a function name.");
         }
     }
 

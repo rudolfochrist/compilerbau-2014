@@ -469,6 +469,14 @@ public class Parser {
     private void func_call() {
         if (peek(Types.OPEN_ROUND)) {
             match(Types.OPEN_ROUND);
+
+            try {
+                symbols.verifyFunctionWasDeclared(context.lastFoundIdentifier);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if this occurs
+            }
+
             args();
             match(Types.CLOSE_ROUND);
         } else if (peek(Types.OP_MUL) || peek(Types.OP_DIV) || peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) || peek(Types.OP_OR) ||
@@ -662,6 +670,14 @@ public class Parser {
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
+
+            try {
+                symbols.verifyVariableWasDeclared(context.lastFoundIdentifier, context.currentScope);
+            } catch (final Symboltable.SymbolException e) {
+                scanner.messages.error(scanner.lineno, e.getMessage());
+                // TODO: error handling if this occurs
+            }
+
             sync();
         } else {
             throwParseError(Types.OPEN_ROUND);
