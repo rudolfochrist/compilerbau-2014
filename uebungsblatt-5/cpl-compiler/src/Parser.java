@@ -387,7 +387,7 @@ public class Parser {
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
-            throwParseError(Types.OP_ASSIGNMENT);
+            throwParseError(Types.OP_ASSIGNMENT, Types.OPEN_ROUND);
         }
     }
 
@@ -826,6 +826,7 @@ public class Parser {
         final Lexer lexer = new Lexer(reader, writer);
         try {
             new Parser(lexer).parse();
+            lexer.messages.print(lexer.lineno, writer); // Print messages of last line
         } catch (final ParserException e) {
             // print pending messages
             writer.println(); // Line feed. Exceptions skips unread newlines. Just for aesthetic reasons.
