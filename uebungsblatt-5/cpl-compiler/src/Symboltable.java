@@ -9,7 +9,7 @@ public class Symboltable {
     /**
      * Exception that is thrown if the symbol could not be added to the table.
      */
-    public class SymbolException extends Exception {
+    public class SymbolException extends RuntimeException {
 
         public SymbolException(String message) {
             super(message);
