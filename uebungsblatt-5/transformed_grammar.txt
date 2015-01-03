@@ -32,7 +32,7 @@
                      return_stmt.                                             FIRST=("return")
 12.2. assignment_or_func_call -> id assignment_or_func_call_rest.             FIRST=(id)                                            FOLLOW=(";")
 12.3. assignment_or_func_call_rest -> assignment |                            FIRST=(":=")                                          FOLLOW=(";")
-                                      ε.                                      FIRST=(ε)
+                                      func_call.                              FIRST=("(")
 13. struct_stmt -> comp_stmt |                                                FIRST=("{")                                           FOLLOW=(id,"return","{","if","while","}","fi","else")
                    cond |                                                     FIRST=("if")
                    loop.                                                      FIRST=("while")
