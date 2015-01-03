@@ -384,6 +384,8 @@ public class Parser {
             assignment();
         } else if (peek(Types.OPEN_ROUND)) {
             func_call();
+        } else if (peek(Types.SEMICOLON)) {
+            sync();
         } else {
             throwParseError(Types.OP_ASSIGNMENT);
         }
