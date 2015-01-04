@@ -3,23 +3,10 @@
 
 public class Yytoken {
     private final Parser.Types type;
-    private int ival;
-    private double dval;
     private String sval;
-    private Object oval;
 
     public Yytoken(Parser.Types type) {
         this.type = type;
-    }
-
-    public Yytoken(Parser.Types type, int ival) {
-        this.type = type;
-        this.ival = ival;
-    }
-
-    public Yytoken(Parser.Types type, double dval) {
-        this.type = type;
-        this.dval = dval;
     }
 
     public Yytoken(Parser.Types type, String sval) {
@@ -27,22 +14,8 @@ public class Yytoken {
         this.sval = sval;
     }
 
-    public Yytoken(Parser.Types type, Object oval) {
-        this.type = type;
-        this.oval = oval;
-    }
-
     public String value() {
-        if (sval != null) {
-            return sval;
-        }
-        if (oval != null) {
-            return oval.toString();
-        }
-        if (ival != 0) {
-            return ""+ival;
-        }
-        return ""+dval;
+        return sval;
     }
 
     public Parser.Types getType() {
@@ -74,6 +47,10 @@ public class Yytoken {
 
     @Override
     public String toString() {
-        return "Token with type "+type + " and value "+value();
+        String toString = "Token "+type;
+        if (sval != null) {
+            toString += " with value "+value();
+        }
+        return toString;
     }
 }

@@ -11,10 +11,6 @@ import java.io.PrintWriter;
       return new Yytoken(type);
   }
 
-  public Yytoken t(Parser.Types type, int value) {
-      return new Yytoken(type, value);
-  }
-
   public Yytoken t(Parser.Types type, String value) {
       return new Yytoken(type, value);
   }
@@ -52,7 +48,7 @@ import java.io.PrintWriter;
 
 "true"            { print(yytext()); return t(Parser.Types.CONST_TRUE); }
 "false"           { print(yytext()); return t(Parser.Types.CONST_FALSE); }
-[0-9]+            { print(yytext()); return t(Parser.Types.LIT_NUMBER, Integer.parseInt(yytext())); }
+[0-9]+            { print(yytext()); return t(Parser.Types.LIT_NUMBER, yytext()); }
 "="               { print(yytext()); return t(Parser.Types.OP_EQ); }
 "!="              { print(yytext()); return t(Parser.Types.OP_NEQ); }
 "<"               { print(yytext()); return t(Parser.Types.OP_LT); }

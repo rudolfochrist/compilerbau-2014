@@ -13,4 +13,5 @@ public class Parsercontext {
      * If null, no function is parsed (global scope).
      */
     public String currentScope = null;
+    public Yytoken lastFoundToken;
 }

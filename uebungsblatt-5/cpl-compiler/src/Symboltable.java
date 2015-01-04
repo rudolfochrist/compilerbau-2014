@@ -132,4 +132,26 @@ public class Symboltable {
 
         return b.toString();
     }
+
+    public void verifyMatchingTypes(Parsercontext context, Metainfo metainfo) {
+        final String variableName = context.lastFoundIdentifier.value();
+        final String scope = context.currentScope;
+        final Symbol symbol = getContextMap(scope).get(variableName);
+
+        symbol.equalsIdentifierType(metainfo.expectedType);
+    }
+
+    public Parser.Types getIdentifierType(Yytoken lastFoundIdentifier, String scope) {
+        final String identifierName = lastFoundIdentifier.value();
+        final Map<String, Symbol> contextMap = getContextMap(scope);
+        final Symbol symbol = contextMap.get(identifierName);
+        if (symbol == null) {
+            return null;
+        }
+        return symbol.getIdentifierType();
+    }
+
+    public Parser.Types getFunctionType(String functionName) {
+        return symbols.get(functionName).getIdentifierType();
+    }
 }
