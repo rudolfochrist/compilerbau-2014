@@ -81,7 +81,7 @@ import java.io.PrintWriter;
 ";"               { print(yytext()); return t(Parser.Types.SEMICOLON); }
 "then"            { print(yytext()); return t(Parser.Types.KEYWORD_THEN); }
 "fi"              { print(yytext()); return t(Parser.Types.KEYWORD_ENDIF); }
-"\n"              { print(yytext()); messages.print(lineno, writer); print("" + ++lineno); print(": "); }
+"\n"|"\r\n"       { print(yytext()); messages.print(lineno, writer); print("" + ++lineno); print(": "); }
 
 [a-z][a-zA-Z0-9_]* {
                    print(yytext());
