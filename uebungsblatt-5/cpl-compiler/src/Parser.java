@@ -882,7 +882,7 @@ public class Parser {
         final InputStreamReader reader = new InputStreamReader(new FileInputStream(argv[0]));
         final String filename = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime())
                 + "-cpl-compiler-listing.txt";
-        final PrintWriter writer = new PrintWriter(System.out); //(filename, "UTF-8");
+        final PrintWriter writer = new PrintWriter(filename, "UTF-8");
         final Lexer lexer = new Lexer(reader, writer);
         try {
             new Parser(lexer).parse();
