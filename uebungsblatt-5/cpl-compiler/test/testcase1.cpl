@@ -1,0 +1,21 @@
+int test() {
+    return 1;
+}
+
+bool test2(bool x) {
+    return x;
+}
+
+int test3(bool y) {
+    return y; /* Muss Fehler geben, da ungleicher Typ */
+}
+
+int test4(int x, int y) {
+    return a; /* Muss Fehler geben, da a nicht deklariert wurde */
+}
+
+int test5() {
+    test();
+    return test3();
+    return test2(); /* Muss Fehler geben, da ungleicher Typ */
+}

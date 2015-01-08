@@ -257,6 +257,7 @@ public class Parser {
             type_id();
             try {
                 symbols.addVariable(context);
+                symbols.addFunctionparameter(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
                 // TODO: error handling if symbol name already exists ?
@@ -498,23 +499,34 @@ public class Parser {
     }
 
     private void args() {
+        final Metainfo metainfo = new Metainfo();
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            arg_list();
+            metainfo.currentlyCalledFunction = context.lastFoundIdentifier.value(); // save the name of the currently parsed function for parameter validation
+            arg_list(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             // sync(); EPSILON
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
+
+        try {
+            symbols.verifyFunctionParamCount(metainfo.currentlyCalledFunction, metainfo.currentlyCalledFunctionParameterCount); // check if the right number of parameters were passed to the function
+        } catch (final Symboltable.SymbolException e) {
+            scanner.messages.error(scanner.lineno, e.getMessage());
+        }
     }
 
-    private void arg_list() {
+    private void arg_list(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            expr(new Metainfo());
-            arg_list_rest();
+
+            final Types paramType = symbols.getFunctionParamType(metainfo);
+            expr(new Metainfo(paramType)); // expression must have the type that was declared in the function definition
+            metainfo.currentlyCalledFunctionParameterCount++;
+            arg_list_rest(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             sync();
         } else {
@@ -522,10 +534,10 @@ public class Parser {
         }
     }
 
-    private void arg_list_rest() {
+    private void arg_list_rest(Metainfo metainfo) {
         if (peek(Types.COMMA)) {
             match(Types.COMMA);
-            arg_list();
+            arg_list(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             // sync(); EPSILON
         } else {

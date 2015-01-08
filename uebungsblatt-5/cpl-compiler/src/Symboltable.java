@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,9 +28,15 @@ public class Symboltable {
      */
     private final Map<String, Map<String, Symbol>> functions;
 
+    /**
+     * Map that contains all parameter definitions for each function
+     */
+    private final Map<String, List<Symbol>> functionparameters;
+
     public Symboltable() {
         symbols = new HashMap<String, Symbol>();
         functions = new HashMap<String, Map<String, Symbol>>();
+        functionparameters = new HashMap<String, List<Symbol>>();
     }
 
     /**
@@ -62,6 +70,21 @@ public class Symboltable {
 
         symbols.put(functionName, Symbol.function(context.lastFoundIdentifier, context.lastFoundType));
         functions.put(functionName, new HashMap<String, Symbol>());
+    }
+
+    public void addFunctionparameter(Parsercontext context) {
+        final String functionname = context.currentScope;
+        final Symbol symbol = getContextMap(context.currentScope).get(context.lastFoundIdentifier.value());
+        getFunctionparameters(functionname).add(symbol);
+    }
+
+    private List<Symbol> getFunctionparameters(String functionname) {
+        List<Symbol> list = functionparameters.get(functionname);
+        if (list == null) {
+            list = new ArrayList<Symbol>();
+            functionparameters.put(functionname, list);
+        }
+        return list;
     }
 
     /**
@@ -153,5 +176,23 @@ public class Symboltable {
 
     public Parser.Types getFunctionType(String functionName) {
         return symbols.get(functionName).getIdentifierType();
+    }
+
+    public void verifyFunctionParamCount(String functionname, int i) {
+        final int size = getFunctionparameters(functionname).size();
+        if (size != i) {
+            throw new SymbolException("Function '"+functionname+"' takes "+size+" parameters, but "+i+" were specified.");
+        }
+    }
+
+    public Parser.Types getFunctionParamType(Metainfo metainfo) {
+
+        final List<Symbol> parameters = getFunctionparameters(metainfo.currentlyCalledFunction);
+
+       if (metainfo.currentlyCalledFunctionParameterCount >= parameters.size()) {
+           return null;
+       }
+
+        return getFunctionparameters(metainfo.currentlyCalledFunction).get(metainfo.currentlyCalledFunctionParameterCount).getIdentifierType();
     }
 }
