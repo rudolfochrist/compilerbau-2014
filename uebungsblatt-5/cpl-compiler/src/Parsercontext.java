@@ -13,4 +13,8 @@ public class Parsercontext {
      * If null, no function is parsed (global scope).
      */
     public String currentScope = null;
+
+    /** Last token the scanner read */
+    public Yytoken lastFoundToken;
+
 }

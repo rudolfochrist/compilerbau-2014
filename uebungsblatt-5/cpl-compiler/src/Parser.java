@@ -66,7 +66,9 @@ public class Parser {
     private boolean match(Types tokenType) {
         if (new Yytoken(tokenType).equals(currentToken)) {
             try {
+                final Yytoken lastToken = currentToken;
                 currentToken = scanner.yylex();
+                context.lastFoundToken = lastToken;
                 return true;
             } catch (final IOException e) {
                 e.printStackTrace();
@@ -156,7 +158,7 @@ public class Parser {
     private void type_id() {
         if (peek(Types.TYPE_INT) || peek(Types.TYPE_BOOL)) {
             type();
-            id();
+            id(new Metainfo());
         } else if (peek(Types.OPEN_ROUND) || peek(Types.COMMA)) {
             sync();
         } else {
@@ -182,6 +184,7 @@ public class Parser {
             throwParseError(Types.COMMA, Types.SEMICOLON);
         }
     }
+
     private void var_decl_rest() {
         if (peek(Types.COMMA) || peek(Types.SEMICOLON)) {
             var_decl();
@@ -193,14 +196,13 @@ public class Parser {
     }
 
     private void type() {
-        final Yytoken token = currentToken;
         if (peek(Types.TYPE_INT)) {
             if (match(Types.TYPE_INT)) {
-                context.lastFoundType = token;
+                context.lastFoundType = context.lastFoundToken;
             }
         } else if (peek(Types.TYPE_BOOL)) {
             if (match(Types.TYPE_BOOL)) {
-                context.lastFoundType = token;
+                context.lastFoundType = context.lastFoundToken;
             }
         } else if (peek(Types.IDENTIFIER)) {
             sync();
@@ -218,7 +220,7 @@ public class Parser {
                 // TODO: error handling if symbol name already exists ?
             }
             match(Types.COMMA);
-            id();
+            id(new Metainfo());
             id_list();
         } else if (peek(Types.SEMICOLON)) {
             // sync(); EPSILON
@@ -255,6 +257,7 @@ public class Parser {
             type_id();
             try {
                 symbols.addVariable(context);
+                symbols.addFunctionparameter(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
                 // TODO: error handling if symbol name already exists ?
@@ -362,8 +365,8 @@ public class Parser {
 
     private void assignment_or_func_call() {
         if (peek(Types.IDENTIFIER)) {
-            id();
-            assignment_or_func_call_rest();
+            final Metainfo metainfo = id(new Metainfo());
+            assignment_or_func_call_rest(metainfo);
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
@@ -371,17 +374,20 @@ public class Parser {
         }
     }
 
-    private void id() {
-        final Yytoken token = currentToken;
+    private Metainfo id(Metainfo metainfo) {
         if(match(Types.IDENTIFIER)) {
-            context.lastFoundIdentifier = token;
+            context.lastFoundIdentifier = context.lastFoundToken;
+            final Types identifierType = symbols.getIdentifierType(context.lastFoundIdentifier, context.currentScope);
+            checkMatchingTypes(metainfo, identifierType);
+            return metainfo.expectedType == null ? new Metainfo(identifierType) : metainfo;
         }
+        return metainfo;
     }
 
 
-    private void assignment_or_func_call_rest() {
+    private Metainfo assignment_or_func_call_rest(Metainfo metainfo) {
         if (peek(Types.OP_ASSIGNMENT)) {
-            assignment();
+            return assignment(metainfo);
         } else if (peek(Types.OPEN_ROUND)) {
             func_call();
         } else if (peek(Types.SEMICOLON)) {
@@ -389,6 +395,7 @@ public class Parser {
         } else {
             throwParseError(Types.OP_ASSIGNMENT, Types.OPEN_ROUND);
         }
+        return new Metainfo();
     }
 
     private void struct_stmt() {
@@ -405,7 +412,7 @@ public class Parser {
         }
     }
 
-    private void assignment() {
+    private Metainfo assignment(Metainfo metainfo) {
         if (peek(Types.OP_ASSIGNMENT)) {
             match(Types.OP_ASSIGNMENT);
             try {
@@ -414,19 +421,22 @@ public class Parser {
                 scanner.messages.error(scanner.lineno, e.getMessage());
                 // TODO: error handling if this occurs
             }
-            expr();
+            final Metainfo metainfoNew = expr(metainfo);
+            symbols.verifyMatchingTypes(context, metainfoNew);
+            return metainfoNew;
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
             throwParseError(Types.OP_ASSIGNMENT);
         }
+        return new Metainfo();
     }
 
     private void cond() {
         if (peek(Types.KEYWORD_IF)) {
             match(Types.KEYWORD_IF);
             match(Types.OPEN_ROUND);
-            expr();
+            expr(new Metainfo());
             match(Types.CLOSE_ROUND);
             match(Types.KEYWORD_THEN);
             stmt();
@@ -456,7 +466,7 @@ public class Parser {
         if (peek(Types.KEYWORD_WHILE)) {
             match(Types.KEYWORD_WHILE);
             match(Types.OPEN_ROUND);
-            expr();
+            expr(new Metainfo());
             match(Types.CLOSE_ROUND);
             stmt();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
@@ -489,23 +499,34 @@ public class Parser {
     }
 
     private void args() {
+        final Metainfo metainfo = new Metainfo();
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            arg_list();
+            metainfo.currentlyCalledFunction = context.lastFoundIdentifier.value(); // save the name of the currently parsed function for parameter validation
+            arg_list(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             // sync(); EPSILON
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
+
+        try {
+            symbols.verifyFunctionParamCount(metainfo.currentlyCalledFunction, metainfo.currentlyCalledFunctionParameterCount); // check if the right number of parameters were passed to the function
+        } catch (final Symboltable.SymbolException e) {
+            scanner.messages.error(scanner.lineno, e.getMessage());
+        }
     }
 
-    private void arg_list() {
+    private void arg_list(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            expr();
-            arg_list_rest();
+
+            final Types paramType = symbols.getFunctionParamType(metainfo);
+            expr(new Metainfo(paramType)); // expression must have the type that was declared in the function definition
+            metainfo.currentlyCalledFunctionParameterCount++;
+            arg_list_rest(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             sync();
         } else {
@@ -513,10 +534,10 @@ public class Parser {
         }
     }
 
-    private void arg_list_rest() {
+    private void arg_list_rest(Metainfo metainfo) {
         if (peek(Types.COMMA)) {
             match(Types.COMMA);
-            arg_list();
+            arg_list(metainfo);
         } else if (peek(Types.CLOSE_ROUND)) {
             // sync(); EPSILON
         } else {
@@ -527,7 +548,8 @@ public class Parser {
     private void return_stmt() {
         if (peek(Types.KEYWORD_RETURN)) {
             match(Types.KEYWORD_RETURN);
-            expr();
+            final Types functionType = symbols.getFunctionType(context.currentScope); // scope is always the name of the current function
+            expr(new Metainfo(functionType)); // Return expression has to have the declared function type
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
@@ -548,100 +570,112 @@ public class Parser {
         }
     }
 
-    private void expr() {
+    private Metainfo expr(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            simple_expr();
-            expr_rest();
+            final Metainfo metainfoNew = simple_expr(metainfo);
+            return expr_rest(metainfoNew);
         } else if (peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
             sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
+        return new Metainfo();
     }
 
-    private void expr_rest() {
+    private Metainfo expr_rest(Metainfo metainfo) {
         if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) ||
                 peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE)) {
-            rel_op();
-            simple_expr();
+            final Metainfo metainfoNew = rel_op(metainfo);
+            return simple_expr(metainfoNew);
         } else if (peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
+            return metainfo;
             // sync(); EPSILON
         } else {
             throwParseError(Types.OP_EQ, Types.OP_NEQ, Types.OP_LT, Types.OP_LE, Types.OP_GT, Types.OP_GE);
         }
+        return new Metainfo();
     }
 
-    private void simple_expr() {
+    private Metainfo simple_expr(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            term();
-            simple_expr_rest();
+            final Metainfo metainfoNew = term(metainfo);
+            return simple_expr_rest(metainfoNew);
         } else if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE) ||
                 peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
             sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
+        return new Metainfo();
     }
 
-    private void simple_expr_rest() {
+    private Metainfo simple_expr_rest(Metainfo metainfo) {
         if (peek(Types.OP_PLUS) || peek(Types.OP_MINUS) || peek(Types.OP_OR)) {
-            add_op();
-            term();
-            simple_expr_rest();
+            Metainfo metainfoNew = add_op(metainfo);
+            metainfoNew = term(metainfoNew);
+            return simple_expr_rest(metainfoNew);
         } else if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE) ||
                 peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
             // sync(); EPSILON
+            return metainfo;
         } else {
             throwParseError(Types.OP_PLUS, Types.OP_MINUS, Types.OP_OR);
         }
+        return new Metainfo();
     }
 
-    private void term() {
+    private Metainfo term(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.IDENTIFIER) ||
                 peek(Types.OPEN_ROUND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS) ||
                 peek(Types.OP_NOT) || peek(Types.LIT_NUMBER)) {
-            factor();
-            term_rest();
+            final Metainfo metainfoNew = factor(metainfo);
+            return term_rest(metainfoNew);
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
             sync();
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.IDENTIFIER, Types.OPEN_ROUND, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT, Types.LIT_NUMBER);
         }
+        return new Metainfo();
     }
 
-    private void term_rest() {
+    private Metainfo term_rest(Metainfo metainfo) {
         if (peek(Types.OP_MUL) || peek(Types.OP_DIV) || peek(Types.OP_AND)) {
-            mul_op();
-            factor();
-            term_rest();
+            Metainfo metainfoNew = mul_op(metainfo);
+            metainfoNew = factor(metainfoNew);
+            return term_rest(metainfoNew);
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
+
+            return metainfo;
             // sync(); EPSILON
         } else {
             throwParseError(Types.OP_MUL, Types.OP_DIV, Types.OP_AND);
         }
+        return new Metainfo();
     }
 
-    private void factor() {
+    private Metainfo factor(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER)) {
-            const_val();
+            return const_val(metainfo);
         } else if (peek(Types.OPEN_ROUND)) {
             match(Types.OPEN_ROUND);
-            expr();
+            final Metainfo metainfoNew = expr(metainfo);
             match(Types.CLOSE_ROUND);
+            return metainfoNew;
         } else if (peek(Types.IDENTIFIER)) {
-            id_or_func_call();
+            return id_or_func_call(metainfo);
         } else if (peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
-            sign();
-            factor();
+            final Metainfo metainfoNew = sign(metainfo);
+            return factor(metainfoNew);
         } else if (peek(Types.OP_NOT)) {
             match(Types.OP_NOT);
-            factor();
+            checkMatchingTypes(metainfo, Types.TYPE_BOOL);
+            return factor(metainfo);
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND)) {
@@ -649,12 +683,14 @@ public class Parser {
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.LIT_NUMBER, Types.OPEN_ROUND, Types.IDENTIFIER, Types.OP_PLUS, Types.OP_MINUS, Types.OP_NOT);
         }
+        return metainfo;
     }
 
-    private void id_or_func_call() {
+    private Metainfo id_or_func_call(Metainfo metainfo) {
         if (peek(Types.IDENTIFIER)) {
-            id();
+            final Metainfo metainfoNew = id(metainfo);
             id_or_func_call_rest();
+            return metainfoNew;
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
@@ -662,6 +698,7 @@ public class Parser {
         }  else {
             throwParseError(Types.IDENTIFIER);
         }
+        return new Metainfo();
     }
 
     private void id_or_func_call_rest() {
@@ -677,81 +714,97 @@ public class Parser {
                 scanner.messages.error(scanner.lineno, e.getMessage());
                 // TODO: error handling if this occurs
             }
-
             // sync(); EPSILON
         } else {
             throwParseError(Types.OPEN_ROUND);
         }
     }
 
-    private void sign() {
+    private Metainfo sign(Metainfo metainfo) {
         if (peek(Types.OP_PLUS)) {
             match(Types.OP_PLUS);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_MINUS)) {
             match(Types.OP_MINUS);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT)) {
             sync();
         } else {
             throwParseError(Types.OP_PLUS, Types.OP_MINUS);
         }
+        return metainfo;
     }
 
-    private void mul_op() {
+    private Metainfo mul_op(Metainfo metainfo) {
         if (peek(Types.OP_MUL)) {
             match(Types.OP_MUL);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_DIV)) {
             match(Types.OP_DIV);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_AND)) {
             match(Types.OP_AND);
+            checkMatchingTypes(metainfo, Types.TYPE_BOOL);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
             sync();
         } else {
             throwParseError(Types.OP_MUL, Types.OP_DIV, Types.OP_AND);
         }
+        return metainfo;
     }
 
-    private void add_op() {
+    private Metainfo add_op(Metainfo metainfo) {
         if (peek(Types.OP_PLUS)) {
             match(Types.OP_PLUS);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_MINUS)) {
             match(Types.OP_MINUS);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_OR)) {
             match(Types.OP_OR);
+            checkMatchingTypes(metainfo, Types.TYPE_BOOL);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT)) {
+            // EPSILON
         } else {
             throwParseError(Types.OP_PLUS, Types.OP_MINUS, Types.OP_OR);
         }
+        return metainfo;
     }
 
-    private void rel_op() {
+    private Metainfo rel_op(Metainfo metainfo) {
         if (peek(Types.OP_EQ)) {
             match(Types.OP_EQ);
         } else if (peek(Types.OP_NEQ)) {
             match(Types.OP_NEQ);
         } else if (peek(Types.OP_LT)) {
             match(Types.OP_LT);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_LE)) {
             match(Types.OP_LE);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_GT)) {
             match(Types.OP_GT);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.OP_GE)) {
             match(Types.OP_GE);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
         } else if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE) || peek(Types.LIT_NUMBER) || peek(Types.IDENTIFIER) || peek(Types.OPEN_ROUND) ||
                 peek(Types.OP_NOT) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
             sync();
         } else {
             throwParseError(Types.OP_EQ, Types.OP_NEQ, Types.OP_LT, Types.OP_LE, Types.OP_GT, Types.OP_GE);
         }
+        return metainfo;
     }
 
-    private void const_val() {
+    private Metainfo const_val(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE) || peek(Types.CONST_FALSE)) {
-            bool_const();
+            return bool_const(metainfo);
         } else if (peek(Types.LIT_NUMBER)) {
-            number();
+            return number(metainfo);
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
@@ -759,11 +812,14 @@ public class Parser {
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE, Types.LIT_NUMBER);
         }
+        return new Metainfo();
     }
 
-    private void number() {
+    private Metainfo number(Metainfo metainfo) {
         if (peek(Types.LIT_NUMBER)) {
             match(Types.LIT_NUMBER);
+            checkMatchingTypes(metainfo, Types.TYPE_INT);
+            return metainfo.expectedType == null ? new Metainfo(Types.TYPE_INT) : metainfo;
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
@@ -771,13 +827,28 @@ public class Parser {
         } else {
             throwParseError(Types.LIT_NUMBER);
         }
+        return metainfo;
     }
 
-    private void bool_const() {
+    private void checkMatchingTypes(Metainfo metainfo, Types actualType) {
+
+        if (actualType == null || metainfo.expectedType == null) {
+            return;
+        }
+
+        if (metainfo.expectedType != actualType) {
+            scanner.messages.error(scanner.lineno, "Expected "+metainfo.expectedType+" but got "+actualType+ " at "+context.lastFoundToken);
+        }
+    }
+
+    private Metainfo bool_const(Metainfo metainfo) {
         if (peek(Types.CONST_TRUE)) {
             match(Types.CONST_TRUE);
+            checkMatchingTypes(metainfo, Types.TYPE_BOOL);
+            return metainfo.expectedType == null ? new Metainfo(Types.TYPE_BOOL) : metainfo;
         } else if (peek(Types.CONST_FALSE)) {
             match(Types.CONST_FALSE);
+            checkMatchingTypes(metainfo, Types.TYPE_BOOL);
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
@@ -785,6 +856,7 @@ public class Parser {
         } else {
             throwParseError(Types.CONST_TRUE, Types.CONST_FALSE);
         }
+        return metainfo;
     }
 
     private void throwParseError(Types... types) {

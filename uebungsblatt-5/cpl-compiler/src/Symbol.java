@@ -1,4 +1,5 @@
 
+
 public class Symbol {
 
     public enum Symboltype {
@@ -40,12 +41,20 @@ public class Symbol {
         this.scope = null;
     }
 
+    public boolean equalsIdentifierType(Parser.Types token) {
+        return identifiertype.getType() == token;
+    }
+
     public String scope() {
         return scope;
     }
 
     public String getIdentifierName() {
         return identifier.value();
+    }
+
+    public Parser.Types getIdentifierType() {
+        return identifiertype.getType();
     }
 
     public boolean isVariable() {
