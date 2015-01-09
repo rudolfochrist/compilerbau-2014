@@ -132,7 +132,6 @@ public class Parser {
                 symbols.addFunction(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if symbol name already exists ?
             }
             context.currentScope = context.lastFoundIdentifier.value();
             func_decl();
@@ -173,7 +172,6 @@ public class Parser {
                 symbols.addVariable(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if symbol name already exists ?
             }
             match(Types.SEMICOLON);
             type_id();
@@ -217,7 +215,6 @@ public class Parser {
                 symbols.addVariable(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if symbol name already exists ?
             }
             match(Types.COMMA);
             id(new Metainfo());
@@ -260,7 +257,6 @@ public class Parser {
                 symbols.addFunctionparameter(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if symbol name already exists ?
             }
             param_list_rest();
         } else if (peek(Types.CLOSE_ROUND)) {
@@ -315,7 +311,6 @@ public class Parser {
                 symbols.addVariable(context);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if symbol name already exists ?
             }
             match(Types.SEMICOLON);
             var_decl_body();
@@ -418,7 +413,6 @@ public class Parser {
                 symbols.verifyVariableWasDeclared(context.lastFoundIdentifier, context.currentScope);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if this occurs
             }
             final Metainfo metainfo = expr(new Metainfo());
             final Types expectedType = symbols.getIdentifierType(context.lastFoundIdentifier, context.currentScope); // Type of the left hand side of the assignment
@@ -489,7 +483,6 @@ public class Parser {
                 symbols.verifyFunctionWasDeclared(context.lastFoundIdentifier);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if this occurs
             }
 
             args();
@@ -723,7 +716,6 @@ public class Parser {
                 symbols.verifyVariableWasDeclared(context.lastFoundIdentifier, context.currentScope);
             } catch (final Symboltable.SymbolException e) {
                 scanner.messages.error(scanner.lineno, e.getMessage());
-                // TODO: error handling if this occurs
             }
             // sync(); EPSILON
         } else {
