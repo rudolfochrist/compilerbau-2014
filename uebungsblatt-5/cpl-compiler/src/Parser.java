@@ -374,7 +374,7 @@ public class Parser {
             context.lastFoundIdentifier = context.lastFoundToken;
             final Types identifierType = symbols.getIdentifierType(context.lastFoundIdentifier, context.currentScope);
             checkMatchingTypes(metainfo, identifierType);
-            return metainfo.expectedType == null ? new Metainfo(identifierType) : metainfo;
+            return metainfo.requiredType == null ? new Metainfo(identifierType) : metainfo;
         }
         return metainfo;
     }
@@ -416,7 +416,7 @@ public class Parser {
             }
             final Metainfo metainfo = expr(new Metainfo());
             final Types expectedType = symbols.getIdentifierType(context.lastFoundIdentifier, context.currentScope); // Type of the left hand side of the assignment
-            checkMatchingTypes(expectedType, metainfo.expectedType); // check if left and right side of the assignment have the same type
+            checkMatchingTypes(expectedType, metainfo.requiredType); // check if left and right side of the assignment have the same type
 
         } else if (peek(Types.SEMICOLON)) {
             sync();
@@ -431,7 +431,7 @@ public class Parser {
             match(Types.OPEN_ROUND);
 
             final Metainfo metainfo = expr(new Metainfo());
-            checkMatchingTypes(metainfo.expectedType, Types.TYPE_BOOL); // check if condition has bool return type
+            checkMatchingTypes(metainfo.requiredType, Types.TYPE_BOOL); // check if condition has bool return type
 
             match(Types.CLOSE_ROUND);
             match(Types.KEYWORD_THEN);
@@ -464,7 +464,7 @@ public class Parser {
             match(Types.OPEN_ROUND);
 
             final Metainfo metainfo = expr(new Metainfo());
-            checkMatchingTypes(metainfo.expectedType, Types.TYPE_BOOL); // check if loop condition has bool return type
+            checkMatchingTypes(metainfo.requiredType, Types.TYPE_BOOL); // check if loop condition has bool return type
 
             match(Types.CLOSE_ROUND);
             stmt();
@@ -549,7 +549,7 @@ public class Parser {
             final Metainfo metainfo = expr(new Metainfo());
             final Types functionType = symbols.getFunctionType(context.currentScope); // scope is always the name of the current function
             // Return expression has to have the declared function type
-            checkMatchingTypes(functionType, metainfo.expectedType);
+            checkMatchingTypes(functionType, metainfo.requiredType);
 
         } else if (peek(Types.SEMICOLON)) {
             sync();
@@ -822,7 +822,7 @@ public class Parser {
         if (peek(Types.LIT_NUMBER)) {
             match(Types.LIT_NUMBER);
             checkMatchingTypes(metainfo, Types.TYPE_INT);
-            return metainfo.expectedType == null ? new Metainfo(Types.TYPE_INT) : metainfo;
+            return metainfo.requiredType == null ? new Metainfo(Types.TYPE_INT) : metainfo;
         } else if (peek(Types.OP_OR) || peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) || peek(Types.OP_LE) || peek(Types.OP_GT) ||
                 peek(Types.OP_GE) || peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA) || peek(Types.OP_MUL) || peek(Types.OP_DIV) ||
                 peek(Types.OP_AND) || peek(Types.OP_PLUS) || peek(Types.OP_MINUS)) {
@@ -834,7 +834,7 @@ public class Parser {
     }
 
     private void checkMatchingTypes(Metainfo metainfo, Types actualType) {
-        checkMatchingTypes(metainfo.expectedType, actualType);
+        checkMatchingTypes(metainfo.requiredType, actualType);
     }
 
     private void checkMatchingTypes(Types expectedType, Types actualType) {
@@ -852,7 +852,7 @@ public class Parser {
         if (peek(Types.CONST_TRUE)) {
             match(Types.CONST_TRUE);
             checkMatchingTypes(metainfo, Types.TYPE_BOOL);
-            return metainfo.expectedType == null ? new Metainfo(Types.TYPE_BOOL) : metainfo;
+            return metainfo.requiredType == null ? new Metainfo(Types.TYPE_BOOL) : metainfo;
         } else if (peek(Types.CONST_FALSE)) {
             match(Types.CONST_FALSE);
             checkMatchingTypes(metainfo, Types.TYPE_BOOL);
