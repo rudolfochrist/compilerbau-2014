@@ -595,8 +595,11 @@ public class Parser {
     private Metainfo expr_rest(Metainfo metainfo) {
         if (peek(Types.OP_EQ) || peek(Types.OP_NEQ) || peek(Types.OP_LT) ||
                 peek(Types.OP_LE) || peek(Types.OP_GT) || peek(Types.OP_GE)) {
+            // metainfoNew contains the return type that is required by the rel_op
+            // operator = and != do not have a type requirement, the other operators require type int
             final Metainfo metainfoNew = rel_op(metainfo);
-            return simple_expr(metainfoNew);
+            simple_expr(metainfoNew);
+            return new Metainfo(Types.TYPE_BOOL); // when a rel_op is used, the resulting return type is always bool!
         } else if (peek(Types.CLOSE_ROUND) || peek(Types.SEMICOLON) || peek(Types.COMMA)) {
             return metainfo;
             // sync(); EPSILON
