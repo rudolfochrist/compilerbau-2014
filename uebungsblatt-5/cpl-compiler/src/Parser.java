@@ -365,8 +365,8 @@ public class Parser {
 
     private void assignment_or_func_call() {
         if (peek(Types.IDENTIFIER)) {
-            final Metainfo metainfo = id(new Metainfo());
-            assignment_or_func_call_rest(metainfo);
+            id(new Metainfo());
+            assignment_or_func_call_rest();
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
@@ -385,9 +385,9 @@ public class Parser {
     }
 
 
-    private Metainfo assignment_or_func_call_rest(Metainfo metainfo) {
+    private void assignment_or_func_call_rest() {
         if (peek(Types.OP_ASSIGNMENT)) {
-            return assignment(metainfo);
+            assignment();
         } else if (peek(Types.OPEN_ROUND)) {
             func_call();
         } else if (peek(Types.SEMICOLON)) {
@@ -395,7 +395,6 @@ public class Parser {
         } else {
             throwParseError(Types.OP_ASSIGNMENT, Types.OPEN_ROUND);
         }
-        return new Metainfo();
     }
 
     private void struct_stmt() {
@@ -412,7 +411,7 @@ public class Parser {
         }
     }
 
-    private Metainfo assignment(Metainfo metainfo) {
+    private void assignment() {
         if (peek(Types.OP_ASSIGNMENT)) {
             match(Types.OP_ASSIGNMENT);
             try {
@@ -421,22 +420,25 @@ public class Parser {
                 scanner.messages.error(scanner.lineno, e.getMessage());
                 // TODO: error handling if this occurs
             }
-            final Metainfo metainfoNew = expr(metainfo);
-            symbols.verifyMatchingTypes(context, metainfoNew);
-            return metainfoNew;
+            final Metainfo metainfo = expr(new Metainfo());
+            final Types expectedType = symbols.getIdentifierType(context.lastFoundIdentifier, context.currentScope); // Type of the left hand side of the assignment
+            checkMatchingTypes(expectedType, metainfo.expectedType); // check if left and right side of the assignment have the same type
+
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
             throwParseError(Types.OP_ASSIGNMENT);
         }
-        return new Metainfo();
     }
 
     private void cond() {
         if (peek(Types.KEYWORD_IF)) {
             match(Types.KEYWORD_IF);
             match(Types.OPEN_ROUND);
-            expr(new Metainfo());
+
+            final Metainfo metainfo = expr(new Metainfo());
+            checkMatchingTypes(metainfo.expectedType, Types.TYPE_BOOL); // check if condition has bool return type
+
             match(Types.CLOSE_ROUND);
             match(Types.KEYWORD_THEN);
             stmt();
@@ -466,7 +468,10 @@ public class Parser {
         if (peek(Types.KEYWORD_WHILE)) {
             match(Types.KEYWORD_WHILE);
             match(Types.OPEN_ROUND);
-            expr(new Metainfo());
+
+            final Metainfo metainfo = expr(new Metainfo());
+            checkMatchingTypes(metainfo.expectedType, Types.TYPE_BOOL); // check if loop condition has bool return type
+
             match(Types.CLOSE_ROUND);
             stmt();
         } else if (peek(Types.IDENTIFIER) || peek(Types.KEYWORD_RETURN) || peek(Types.OPEN_BRACE) || peek(Types.KEYWORD_IF) || peek(Types.CLOSE_BRACE) || peek(Types.KEYWORD_ENDIF) || peek(Types.KEYWORD_ELSE)) {
@@ -548,8 +553,11 @@ public class Parser {
     private void return_stmt() {
         if (peek(Types.KEYWORD_RETURN)) {
             match(Types.KEYWORD_RETURN);
+            final Metainfo metainfo = expr(new Metainfo());
             final Types functionType = symbols.getFunctionType(context.currentScope); // scope is always the name of the current function
-            expr(new Metainfo(functionType)); // Return expression has to have the declared function type
+            // Return expression has to have the declared function type
+            checkMatchingTypes(functionType, metainfo.expectedType);
+
         } else if (peek(Types.SEMICOLON)) {
             sync();
         } else {
@@ -831,13 +839,17 @@ public class Parser {
     }
 
     private void checkMatchingTypes(Metainfo metainfo, Types actualType) {
+        checkMatchingTypes(metainfo.expectedType, actualType);
+    }
 
-        if (actualType == null || metainfo.expectedType == null) {
+    private void checkMatchingTypes(Types expectedType, Types actualType) {
+
+        if (actualType == null || expectedType == null) {
             return;
         }
 
-        if (metainfo.expectedType != actualType) {
-            scanner.messages.error(scanner.lineno, "Expected "+metainfo.expectedType+" but got "+actualType+ " at "+context.lastFoundToken);
+        if (expectedType != actualType) {
+            scanner.messages.error(scanner.lineno, "Expected "+expectedType+" but got "+actualType+ " at "+context.lastFoundToken);
         }
     }
 
