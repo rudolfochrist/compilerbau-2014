@@ -40,10 +40,10 @@ import java.io.PrintWriter;
 
 %%
 
-//"/\*.*\*/"        {print("comment: "); }
+//"/\*.*\*/"      {print("comment: "); }
 
-"/*" [^*] ~"*/"       {print("Comment1: "+yytext());}
-"/*" "*"+ "/"         {print("Comment2: "+yytext());}
+"/*" [^*] ~"*/"   {print("yytext());}
+"/*" "*"+ "/"     {print("yytext());}
 
 
 "true"            { print(yytext()); return t(Parser.Types.CONST_TRUE); }
