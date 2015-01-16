@@ -95,7 +95,7 @@ public class Symboltable {
      */
     private void checkValidName(String scope, String name) throws SymbolException {
 
-        final Map<String, Symbol> map = getContextMap(scope);
+        final Map<String, Symbol> map = scope == null ? symbols : functions.get(scope);
         if (map.containsKey(name)) {
             throw new SymbolException("Identifier '"+name+"' is invalid because it is already taken.");
         }
