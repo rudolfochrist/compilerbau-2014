@@ -1,0 +1,29 @@
+/* Testprogramm 3 */
+
+int a1, b11, c11;
+int c1, c2, c3;
+
+
+int foo (int a, int b) {
+
+  int i;
+  int sum;
+
+
+  sum := 0;
+  i := a;
+
+  if (true) then sum := 0; fi
+
+  if (true) then i := sum; else sum := i; fi
+
+
+  while (false) {
+    sum := sum + b;
+    i := i-1;
+  }
+
+}
+
+
+
