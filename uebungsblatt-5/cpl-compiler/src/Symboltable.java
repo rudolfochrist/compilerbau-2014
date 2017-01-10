@@ -114,7 +114,8 @@ public class Symboltable {
     }
 
     public void verifyVariableWasDeclared(Yytoken identifier, String scope) throws SymbolException {
-        final Symbol symbol = getContextMap(scope).get(identifier.value());
+        Map<String, Symbol> map = scope == null ? symbols : functions.get(scope);
+        final Symbol symbol = map.get(identifier.value());
         if (symbol == null) {
             throw new SymbolException("Identifier '"+identifier.value()+"' was not declared.");
         }

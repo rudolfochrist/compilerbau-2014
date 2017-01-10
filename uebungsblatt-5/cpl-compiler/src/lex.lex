@@ -42,8 +42,8 @@ import java.io.PrintWriter;
 
 //"/\*.*\*/"      {print("comment: "); }
 
-"/*" [^*] ~"*/"   {print("yytext());}
-"/*" "*"+ "/"     {print("yytext());}
+"/*" [^*] ~"*/"   {print(yytext());}
+"/*" "*"+ "/"     {print(yytext());}
 
 
 "true"            { print(yytext()); return t(Parser.Types.CONST_TRUE); }
